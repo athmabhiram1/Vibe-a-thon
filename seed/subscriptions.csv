@@ -1,0 +1,7 @@
+sub_id,tool,seats,seat_cost_inr,renewal_date,auto_renew,cancelled_at,owner_id
+SUB-01,Figma,25,149900,2026-11-25,1,,EMP-002
+SUB-02,Slack,40,120000,2027-01-15,1,,EMP-003
+SUB-03,GitHub,30,80000,2027-02-01,0,,EMP-003
+SUB-04,Notion,20,60000,2027-03-10,1,,EMP-002
+SUB-05,Zoom,15,45000,2026-12-20,0,,EMP-002
+SUB-06,1Password,50,30000,2027-04-01,1,,EMP-003

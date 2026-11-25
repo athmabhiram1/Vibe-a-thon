@@ -1,0 +1,86 @@
+# compose.opt.yml — OPT-IN production-like profile ONLY. NOT the default/golden path.
+# Golden path = run.bat / scripts/up.sh local (2x uvicorn + SQLite, no Docker, 3 cmds, <60s).
+# This file is backup-only (postgres + redis + ollama mirror). Every service is behind
+# profiles: ["opt"] so bare `docker compose up` starts NOTHING. Explicit opt-in:
+#   docker compose -f compose.opt.yml --profile opt up --build -d
+# Verify: research/verify/07-docker.md (single-process golden) + research/verify/05-deploy.md (localhost+ngrok primary).
+name: vibe-code-opt
+services:
+  hr-directory:
+    profiles: ["opt"]
+    build: ./hr_service
+    ports: ["8001:8001"]
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --workers 1
+    environment:
+      - HR_BASE_URL=http://hr-directory:8001
+      - ENDPOINT_BASE_URL=http://hr-directory:8001
+      - HR_DB_PATH=${HR_DB_PATH:-/app/data/hr.db}
+    volumes: ["./hr_service:/app", "hr-data:/app/data"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/hr/candidates?limit=1"]
+      interval: 10s
+      retries: 5
+      start_period: 15s
+
+  ticketing-sla:
+    profiles: ["opt"]
+    build: ./it_service
+    ports: ["8002:8002"]
+    command: uvicorn main:app --host 0.0.0.0 --port 8002 --workers 1
+    environment:
+      - IT_BASE_URL=http://ticketing-sla:8002
+      - ENDPOINT_BASE_URL=http://ticketing-sla:8002
+      - IT_DB_PATH=${IT_DB_PATH:-/app/data/it.db}
+    volumes: ["./it_service:/app", "it-data:/app/data"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/it/tickets/breaches"]
+      interval: 10s
+      retries: 5
+      start_period: 15s
+
+  # Backup-only datastores (only start with --profile opt --profile store, or --profile opt + --profile extras).
+  # Golden path uses SQLite files; these exist for the "where's Postgres?" judge question + prod-like rehearsal.
+  postgres:
+    profiles: ["opt", "store"]
+    image: postgres:16-alpine
+    ports: ["5432:5432"]
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-vibe}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-vibe}
+      - POSTGRES_DB=${POSTGRES_DB:-vibe}
+    volumes: ["pg-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-vibe}"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    profiles: ["opt", "store"]
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+
+  # Local model replica (P2 fallback). Large image + weights pull — never on the golden path.
+  # Pre-pull night before: ollama pull qwen3:4b (primary) [+ qwen2.5-coder:7b codegen]; ollama create demo-qwen-8k -f ../Modelfile.local-8k
+  ollama:
+    profiles: ["opt", "models"]
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    environment:
+      - OLLAMA_CONTEXT_LENGTH=8192
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+    volumes: ["ollama-data:/root/.ollama", "../Modelfile.local-8k:/Modelfile.local-8k:ro"]
+
+volumes:
+  hr-data: {}
+  it-data: {}
+  pg-data: {}
+  redis-data: {}
+  ollama-data: {}

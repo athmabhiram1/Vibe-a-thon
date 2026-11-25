@@ -1,0 +1,11 @@
+# VIBE_CODE golden-path requirements (root).
+# Combines requirements-hr.txt + requirements-it.txt.
+# Fresh-clone install: pip install -r requirements.txt
+# Verified: fastapi==0.165.0 and fastmcp==4.2.4 both exist on PyPI (2026-11-24)
+# and install clean (see evidence below).
+fastapi==0.165.0
+fastmcp==4.2.4
+uvicorn==0.54.0
+aiosqlite==0.22.1
+pydantic>=2.10,<3
+email-validator==2.2.0

@@ -1,0 +1,29 @@
+# `synapse info` — quota proof (redacted text capture, 2026-11-24)
+
+> Screenshot-equivalent capture: `synapse info` run 2026-11-24 with
+> `SYNAPSE_API_KEY` from `.env` (value redacted below, never committed).
+> Numbers match `evidence/quota-log.md` last AFTER row and `LIMITS.md`.
+
+```text
+Synapse Info
+────────────────────────
+
+Project
+
+Status          Initialized
+Version         1.0.0
+Created         2026-11-24 13:57
+API key         (not set) (project)
+Analyzed        Not yet (run synapse analyze)
+
+Account Quota
+
+MCP servers     2 / 10 used  (8 remaining)
+Lines indexed   775 / 100.0K  (99.2K remaining)
+```
+
+- Servers: **2/10** (hr-api, it-api) — 8 remaining, freeze threshold intact (T8: freeze hosted if remaining <40%).
+- Indexed lines: **775/100.0K** — 99.2K remaining.
+- Spend: ₹0 / $0 (free tier; rebuilds reuse `surface_cache.json`, no re-index cost).
+- API key redaction: the live key in `.env` (`SYNAPSE_API_KEY=syn-api-…`) was passed
+  via environment only and replaced with `<REDACTED>` in this transcript.

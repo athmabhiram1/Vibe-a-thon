@@ -1,0 +1,21 @@
+candidate_id,full_name,email,role,dept,offer_status,offer_signed_at,bg_status,bg_completed_at,visa_status,visa_expiry,start_date,source,phone,notes
+CAND-001,Aarav Mehta,aarav.mehta01@example.com,SDE-1,Engineering,signed,2026-11-20,pending,,citizen,,2026-11-30,referral,+91-98101-00001,BLOCKED-BG: bg pending gates Day-1 convert
+CAND-002,Priya Nair,priya.nair02@example.com,SDE-1,Engineering,signed,2026-11-20,pass,2026-11-15,citizen,,2026-11-30,referral,+91-98101-00002,HAPPY-PATH: convert live creates EMP-021
+CAND-003,Chen Wei,chen.wei03@example.com,SDE-2,Engineering,signed,2026-11-18,pass,2026-11-14,h1b_expiring_30d,2026-12-20,2026-11-30,portal,+91-98101-00003,VISA-RISK: H-1B expires in 27d
+CAND-004,Sara Thomas,sara.thomas04@example.com,Designer,Design,signed,2026-11-21,pending,,citizen,,2026-12-05,campus,+91-98101-00004,WEEKEND-START Sat: check IT shift cover
+CAND-005,Rohan Gupta,rohan.gupta05@example.com,SDE-2,Engineering,signed,2026-11-21,pending,,citizen,,2026-12-06,referral,+91-98101-00005,WEEKEND-START Sun + laptop on_hold staged
+CAND-006,Rahul Verma,rahul.verma06@example.com,SDE-1,Engineering,signed,2026-11-22,pending,,requires_sponsorship,2027-03-15,2026-12-07,portal,+91-98220-00007,REHIRE double-risk BG+visa: same person as EMP-007 terminated
+CAND-007,Vikram Rao,vikram.rao07@example.com,PM,Product,signed,2026-11-19,pass,2026-11-14,citizen,,2026-12-07,referral,+91-98101-00007,Control: clean hire
+CAND-008,Fatima Khan,fatima.khan08@example.com,SDE-1,Engineering,signed,2026-11-19,pass,2026-11-13,opt_expiring_15d,2026-12-08,2026-12-08,campus,+91-98101-00008,VISA-RISK critical: OPT expires in 15d
+CAND-009,James D'Souza,james.dsouza09@example.com,IT-Support,IT,signed,2026-11-20,fail,2026-11-18,citizen,,2026-12-07,portal,+91-98101-00009,BG-FAIL blocks convert: HR override + typed reason logged
+CAND-010,Kavya Reddy,kavya.reddy10@example.com,Designer,Design,pending,,pending,,h1b_valid,2027-11-01,2026-12-14,portal,+91-98101-00010,Offer not signed: convert button disabled
+CAND-011,Arjun Singh,arjun.singh11@example.com,SDE-1,Engineering,signed,2026-11-22,pass,2026-11-16,citizen,,2026-12-12,campus,+91-98101-00011,WEEKEND-START Sat + badge hold staged
+CAND-012,Meera Pillai,meera.pillai12@example.com,HR-Exec,HR,pending,,pending,,citizen,,2026-12-14,referral,+91-98101-00012,BG pending + equipment already on hold (hold-waste demo)
+CAND-013,Daniel Kim,daniel.kim13@example.com,SDE-2,Engineering,signed,2026-11-20,pass,2026-11-15,h1b_valid,2028-06-30,2026-12-14,portal,+91-98101-00013,Visa OK control
+CAND-014,Ishita Bose,ishita.bose14@example.com,PM,Product,declined,,not_started,,citizen,,,campus,+91-98101-00014,Declined: excluded from Day-1 list
+CAND-015,Aditya Rao,aditya.rao15@example.com,SDE-1,Engineering,signed,2026-11-21,waived_intern,,citizen,,2026-12-07,campus,+91-98101-00015,Intern fast-track: BG waived
+CAND-016,Sofia Almeida,sofia.almeida16@example.com,Designer,Design,signed,2026-11-21,pass,2026-11-16,requires_sponsorship,2027-02-10,2026-12-14,portal,+91-98101-00016,Sponsorship letter task auto-created
+CAND-017,Karan Malhotra,karan.malhotra17@example.com,SDE-1,Engineering,expired,,not_started,,citizen,,,portal,+91-98101-00017,Expired offer: resend flow
+CAND-018,Divya Menon,divya.menon18@example.com,HR-Exec,HR,pending,,pending,,h1b_expiring_30d,2026-12-21,2026-12-21,referral,+91-98101-00018,Pending-nudge email demo
+CAND-019,Omar Farouk,omar.farouk19@example.com,IT-Support,IT,declined,,not_started,,citizen,,,portal,+91-98101-00019,Attrition stat: offer-accept rate
+CAND-020,Neha Sharma,neha.sharma20@example.com,SDE-1,Engineering,signed,2026-11-22,pass,2026-11-17,citizen,,2026-12-13,campus,+91-98101-00020,4th weekend start Sun: SLA ticket T-5007 linked

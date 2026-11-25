@@ -1,0 +1,6 @@
+id,mode,category,expected,observed,verdict,detail,latency_live_ms
+L01,LIVE,live_integration,applied + receipt ACTIVE EMP-021 (next EMP-NNN from live HR),applied receipt=ACTIVE EMP-021 for priya.nair02@example.com.,PASS,preview=prv_84c0ab6e hash=a3564049 risk=B,135.3
+L02,LIVE,live_integration,"already_applied, same EMP id, employee count unchanged (no 2nd write)",already_applied emp=EMP-021 employees=20->20,PASS,same key+hash returned cached result; no 2nd write,9.8
+L03,LIVE,live_integration,"denied bg_fail_blocked, no ledger entry, no HR write",denied reason=DENIED bg_fail_blocked.,PASS,denied at stage gate; ledger untouched; no HTTP writes,7.9
+L04,LIVE,live_integration,"stage previews with hold warning; activate denied precondition_failed:laptop_hold_conflict:LT-1005, no HR write",stage=preview activate=denied reason=DENIED prv_dcdbc63a: precondition_failed:laptop_hold_conflict:LT-1005. employees=20->20,PASS,stage warnings=['laptop_hold_conflict:LT-1005']; commit re-derived hold -> deny,18.3
+L05,LIVE,live_integration,GET /it/oncall-coverage resolves oncall live; POST /it/tickets/T-5002/reroute sets assignee to on-call employee,oncall=EMP-014/kiran.desai@demo.example.com reroute=200 ticket_assignee_email=kiran.desai@demo.example.com,PASS,"resolved owner via live L1 endpoint, rerouted breached ticket, re-read to verify",166.1

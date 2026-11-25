@@ -1,0 +1,21 @@
+ticket_id,title,requester_id,requester_candidate,assignee_id,priority,category,status,created_at,due_at,resolved_at,shift_id,channel
+T-5001,Laptop not provisioned for Day-1 joiner,EMP-005,,EMP-014,P1,laptop_setup,breached,2026-11-22T14:00:00Z,2026-11-22T18:00:00Z,,SH-02,portal
+T-5002,VPN access failing for new hire,EMP-008,,EMP-016,P2,vpn,breached,2026-11-22T10:00:00Z,2026-11-22T18:00:00Z,,SH-03,email
+T-5003,P1 payroll discrepancy blocking offer letter,EMP-002,,EMP-014,P1,payroll,in_progress,2026-11-22T21:00:00Z,2026-11-23T01:00:00Z,,SH-03,slack
+T-5004,Badge not printing for weekend starter,EMP-002,,EMP-015,P2,badge,open,2026-11-22T20:00:00Z,2026-11-23T04:00:00Z,,SH-01,portal
+T-5005,SSO access request for designer tools,EMP-010,,EMP-015,P2,access,open,2026-11-22T18:00:00Z,2026-11-23T02:00:00Z,,SH-01,portal
+T-5006,Laptop setup request for weekend slot,EMP-011,,EMP-016,P3,laptop_setup,open,2026-11-22T12:00:00Z,2026-11-23T12:00:00Z,,SH-02,slack
+T-5007,Ship laptop to weekend starter Neha,,CAND-020,EMP-014,P3,laptop_setup,open,2026-11-22T09:00:00Z,2026-11-23T09:00:00Z,,SH-07,email
+T-5008,Okta group missing for SDE-1,EMP-009,,EMP-015,P2,access,resolved,2026-11-20T09:00:00Z,2026-11-20T17:00:00Z,2026-11-20T15:30:00Z,SH-01,portal
+T-5009,VPN certificate expired,EMP-017,,EMP-016,P3,vpn,resolved,2026-11-19T10:00:00Z,2026-11-20T10:00:00Z,2026-11-19T16:00:00Z,SH-01,email
+T-5010,Ergonomic chair request,EMP-018,,EMP-015,P4,other,resolved,2026-11-18T08:00:00Z,2026-11-20T08:00:00Z,2026-11-19T12:00:00Z,SH-04,portal
+T-5011,Badge reprint after photo update,EMP-010,,EMP-014,P3,badge,resolved,2026-11-20T11:00:00Z,2026-11-21T11:00:00Z,2026-11-21T09:00:00Z,SH-02,portal
+T-5012,Payroll address correction,EMP-019,,EMP-005,P4,payroll,resolved,2026-11-17T09:00:00Z,2026-11-19T09:00:00Z,2026-11-18T14:00:00Z,SH-04,slack
+T-5013,MacBook trackpad replacement,EMP-009,,EMP-014,P2,laptop_setup,resolved,2026-11-21T09:00:00Z,2026-11-21T17:00:00Z,2026-11-21T16:00:00Z,SH-01,email
+T-5014,Rotate prod deploy key before Day-1,EMP-003,,EMP-016,P1,access,in_progress,2026-11-22T22:00:00Z,2026-11-23T02:00:00Z,,SH-03,slack
+T-5015,Wi-Fi onboarding for BLR floor 3,EMP-011,,EMP-015,P2,access,open,2026-11-22T17:00:00Z,2026-11-23T01:00:00Z,,SH-02,portal
+T-5016,Monitor arm for designer pod,EMP-013,,EMP-015,P3,other,in_progress,2026-11-22T06:00:00Z,2026-11-23T06:00:00Z,,SH-01,portal
+T-5017,Standing desk request HYD,EMP-019,,EMP-015,P4,other,in_progress,2026-11-21T10:00:00Z,2026-11-23T10:00:00Z,,SH-04,portal
+T-5018,Docking station for contractor,EMP-013,,EMP-016,P3,laptop_setup,in_progress,2026-11-22T19:00:00Z,2026-11-23T19:00:00Z,,SH-02,slack
+T-5019,Quarterly access review stale items,EMP-003,,EMP-014,P3,access,open,2026-11-20T10:00:00Z,2026-11-21T10:00:00Z,,SH-01,portal
+T-5020,Guest Wi-Fi for campus drive,EMP-005,,EMP-014,P4,other,open,2026-11-22T08:00:00Z,2026-11-24T08:00:00Z,,SH-08,email

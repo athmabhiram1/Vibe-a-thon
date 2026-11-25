@@ -1,0 +1,18 @@
+# Modelfile.local-8k — local P2 fallback replica (offline / airplane-safe).
+# Primary: qwen3:4b (agent tools 97.7 per plan.md S1). Codegen alt: qwen2.5-coder:7b (emit_tool_plan 80-90%).
+# KILLED: gemma3:4b (no native tools, HTTP 400) except <8GB VRAM emergency; llama3.2:3b emergency-only (40-55%).
+# Topology: hosted frontier (P0/P1 judged runs) -> qwen local-8k (P2) -> cached-JSON (P3). T5: emit_tool_plan <60% -> cached-JSON.
+# Build:  ollama pull qwen3:4b && ollama create demo-qwen-8k -f Modelfile.local-8k
+# Verify: ollama ps  # expect CONTEXT 8192, PROCESSOR 100% GPU
+#         curl -s 127.0.0.1:11434/api/ps | jq '.models[] | {name, context_length, size_vram}'
+FROM qwen3:4b
+PARAMETER num_ctx 8192
+PARAMETER temperature 0.2
+PARAMETER num_predict 2048
+PARAMETER num_parallel 1
+SYSTEM """You are a concise demo assistant. Answer from provided context only. Emit one valid JSON tool-call object when asked (tool_name, description, param_names/types, body_source, imports, env_vars, is_async). No prose around JSON."""
+# Codegen note (7B, ~4.7GB pull, 5.5-6.4GB @8K, fits 8GB VRAM / 16GB RAM):
+#   ollama pull qwen2.5-coder:7b && ollama create demo-qwen-codegen-8k -f Modelfile.local-8k.codegen
+#   (swap FROM line to: FROM qwen2.5-coder:7b — same PARAMETER block; 32K native ctx, keep 8192 pin.)
+# Emergency-only (<8GB VRAM spill): FROM gemma3:4b (60-70% tool rate, needs retry). Never default llama3.2:3b.
+# Ollama default num_ctx is 4096 below 24GiB VRAM — unpinned 8K+ prompts silently truncate -> `no emit_tool_plan`. This file pins 8192.

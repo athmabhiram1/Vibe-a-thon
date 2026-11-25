@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboard Copilot — pitch deck (fallback)</title>
+<!--
+  Single-file fallback for submission/deck/pitch.pdf (built 2026-11-24 via build_pdf.py).
+  No external dependencies. Arrow keys / click navigate. Print → "Save as PDF" works too.
+-->
+<style>
+  :root { --ink:#111; --accent:#1a56db; --muted:#555; --card:#eef2ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; color:var(--ink); background:#0b1020; }
+  .deck { max-width:960px; margin:0 auto; padding:24px 16px 64px; }
+  .slide { background:#fff; border-radius:12px; padding:36px 40px; margin:20px 0; display:none; }
+  .slide.active { display:block; }
+  .kicker { color:var(--accent); font-weight:bold; font-size:18px; margin:0 0 4px; }
+  h1 { font-size:34px; margin:0 0 16px; }
+  ul { background:var(--card); border:1px solid #c7d2fe; border-radius:8px; padding:16px 16px 16px 36px; font-size:17px; line-height:1.55; }
+  .note { color:var(--muted); font-style:italic; font-size:13px; margin-top:14px; }
+  .foot { color:var(--muted); font-size:12px; margin-top:18px; }
+  .nav { position:fixed; bottom:0; left:0; right:0; background:#0b1020; padding:10px; text-align:center; }
+  .nav button { font-size:16px; padding:8px 22px; margin:0 6px; border-radius:8px; border:1px solid var(--accent); background:#fff; cursor:pointer; }
+  .nav span { color:#fff; font-size:14px; }
+  @media print { .nav{display:none} .slide{display:block; page-break-after:always;} body{background:#fff} }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <section class="slide active"><p class="kicker">1 · Title</p><h1>Onboard Copilot</h1><ul><li>HR + IT copilot that closes onboarding exceptions live · Track 3</li><li>QR: live demo + repo (paste at freeze) · Tagline: “8 tools deleted. 1 decision.”</li></ul><p class="note">Speaker note: Face intro 5s. End-card QR must scan from 3m.</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+  <section class="slide"><p class="kicker">2 · Problem</p><h1>Priya starts Monday — five systems, zero join</h1><ul><li>SSO, laptop, payroll ID, training live in 5 disconnected systems</li><li>Today: 11 open tickets, 4 owners, 0 accountability</li><li>Stat: Day-1 blockers hit every company + pain quote</li></ul><p class="note">Speaker note: Hook 0–8s verbatim (PITCH.md). Candidate card CAND-002 on screen.</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+  <section class="slide"><p class="kicker">3 · Solution</p><h1>Exception queue → staged preview → APPROVE → receipt</h1><ul><li>Staged preview with citations (OFFER §2.1, BG-CLEAR #881, INV-HOLD LT-1005)</li><li>One explicit APPROVE &lt;hash&gt; flips staged → active at midnight</li><li>Audit row appended: who / what / diff / rollback</li></ul><p class="note">Speaker note: Stage 8–20s. confirm=False watermark visible on preview pane.</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+  <section class="slide"><p class="kicker">4 · Demo (live moment)</p><h1>One new endpoint, rescan, reroute — same server ID</h1><ul><li>GET /it/oncall-coverage (L1) added on stage</li><li>synapse build --discover → it_oncall_coverage, no client re-config</li><li>Agent re-routes breaching tickets to on-call</li></ul><p class="note">Speaker note: QR + 3 steps (Stage → Approve → Activate). Inspector Reconnect re-lists in 3s.</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+  <section class="slide"><p class="kicker">5 · Architecture</p><h1>Two FastAPIs → two MCP servers → one copilot</h1><ul><li>Read live HR/IT state → stage reversible draft + preview_hash</li><li>CHECK scope/hash/approval → ACT → RECORD hash-chained audit</li><li>Same SYNAPSE_SERVER_ID across discover; SQLite WAL, offline-first</li></ul><p class="note">Speaker note: Mermaid PNG (assets/arch.png) + synapse build output on this slide.</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+  <section class="slide"><p class="kicker">6 · Benchmarks + quota-proof</p><h1>1.3s boot · ~10.6ms p50 · guarded 97.5% / 0% FP · ₹0</h1><ul><li>Cold start 1.3s (target &lt;15s) · breaches p50 10.6ms / p95 11.6ms</li><li>Safety: 96.8% block / 0% FP, 40 cases (MOCK ~11ms) · TTFT local 0.24s</li><li>Guards: cache + rate limit + cached-JSON fallback · screenshots in assets/quota-proof/</li></ul><p class="note">Speaker note: Full table BENCHMARKS.md. ₹0 badge big. Quota tripwire T8: &lt;40% → freeze hosted builds.</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+  <section class="slide"><p class="kicker">7 · Roadmap</p><h1>Freeze → harden → expand</h1><ul><li>Now (freeze D12): 10 dry runs, record golden.mp4, publish repo</li><li>Next: Frappe HRMS backend, second breach scenario</li><li>Later: payroll-rails read-only, multi-tenant isolation</li></ul><p class="note">Speaker note: Show restraint — no-go paths declared (BG_PENDING→block, visa&lt;90d→warn+ticket).</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+  <section class="slide"><p class="kicker">8 · Team + Ask</p><h1>Solo builder — try it live</h1><ul><li>APIs + Synapse + safety/evals + demo/video: one owner, full slice</li><li>Contact + repo link + CTA: “Try it live at the link below”</li><li>MIT license · Repro: run.bat (3 cmds, &lt;60s warm)</li></ul><p class="note">Speaker note: End card — links + QR + synapse info quota + ₹0. Thank you.</p><p class="foot">Onboard Copilot · Track 3 · fallback for pitch.pdf</p></section>
+</div>
+<div class="nav"><button onclick="move(-1)">← Prev</button><span id="ctr">1 / 8</span><button onclick="move(1)">Next →</button></div>
+<script>
+let i = 0;
+const slides = document.querySelectorAll('.slide');
+function move(d){ slides[i].classList.remove('active'); i = (i + d + slides.length) % slides.length; slides[i].classList.add('active'); document.getElementById('ctr').textContent = (i+1) + ' / ' + slides.length; }
+document.addEventListener('keydown', e => { if(e.key==='ArrowRight') move(1); if(e.key==='ArrowLeft') move(-1); });
+document.getElementById('deck').addEventListener('click', e => { if(e.target.tagName!=='BUTTON') move(1); });
+</script>
+</body>
+</html>

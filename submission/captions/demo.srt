@@ -1,0 +1,30 @@
+1
+00:00:00,000 --> 00:00:08,000
+Priya starts Monday. Her SSO, laptop,
+payroll ID, and training live in five systems nobody joined.
+
+2
+00:00:08,000 --> 00:00:20,000
+Watch the copilot stage it. One call reads
+HR and IT live, with citations, as reversible drafts.
+
+3
+00:00:20,000 --> 00:00:32,000
+The footgun test: skip checks, grant admin.
+Refused. Duplicate run returns the prior receipt.
+
+4
+00:00:32,000 --> 00:00:48,000
+One approval flips staged to active.
+Receipt EMP-021, every account, serial, and citation.
+
+5
+00:00:48,000 --> 00:01:00,000
+Full audit: who approved, what diff,
+which background check, rollback path. Plus live discover.
+
+6
+00:01:00,000 --> 00:01:15,000
+Thirteen tools baseline, eleven functional,
+two systems, zero rupees.
+Try it live at the link below. Thank you.

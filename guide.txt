@@ -1,0 +1,278 @@
+PAGES: 8
+===== PAGE 1 =====
+2nd Brain Labs × Geek Room: Vibe-a-thon 
+Hackathon Problem Statements
+Participant guide · October 2026
+About 2nd Brain Labs and Synapse
+Teams in this track use Synapse to make existing software usable by AI agents, without
+rewriting it.
+2nd Brain Labs is an AI lab that helps enterprises adopt AI without starting over. It is
+headquartered in Novi, Michigan, with an R&D centre in Hyderabad, India.
+Its flagship, Synapse, is an enterprise context engine. The open-source Synapse CLI reads
+an existing codebase and generates a runnable MCP (Model Context Protocol) server.
+Agents in Claude Desktop, Cursor or any MCP-compatible client can then call that
+system's functions as tools.
+The idea behind every problem statement below: take a system that already exists, and
+make it agent-ready in minutes instead of months.
+Problem statements
+Pick one of four tracks. Tracks 1 to 3 are set problem statements; track 4 is open
+innovation, where you choose the problem. Every track needs Synapse at its core.
+Track Synapse mode Language
+1 Make a legacy app agent-
+ready
+Auto Python, TypeScript, Java, C#,
+Go or Rust
+2 One smart tool from many
+small functions
+Custom Python only
+3 A copilot that works across
+two systems
+Auto (Custom
+optional)
+Any Auto language
+4 Open innovation Auto, Custom or
+both
+Depends on the mode you
+use
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 1 of 8
+===== PAGE 2 =====
+1. Make a legacy app agent-ready
+Companies run on old internal apps nobody wants to rewrite. Pick an existing backend,
+your own or an open-source one, such as an inventory, library, clinic or support-ticket
+system. Use Synapse in Auto mode to turn its HTTP API into an MCP server. Then build an
+agent that completes real multi-step tasks through it, for example "find items running low
+on stock and draft a reorder list".
+Submit: the repo, the generated MCP setup, and a demo of the agent completing at least
+three real tasks, with no changes to the original app's code.
+Judged on: how useful the tasks are, which endpoints you chose to expose and why, and
+how reliably the agent completes them.
+2. One smart tool from many small functions
+Agents work better with a few clear, high-level tools than with dozens of small ones. Take
+a Python project and use Synapse in Custom mode to compose several internal functions
+into one tool for a complete workflow. Examples: "onboard a new employee" (create the
+account, assign equipment, schedule orientation) or "process a refund" (check the order,
+check the policy, issue the refund).
+Submit: the composed tool, an agent that uses it, and a short comparison of the agent
+doing the same job with one tool versus many small ones.
+Judged on: tool design, how the agent handles errors and edge cases, and safety. Add a
+confirmation step before any action that changes data.
+3. A copilot that works across two systems
+Real business questions rarely live in one system. Use Synapse to turn two separate
+codebases into two MCP servers, for example an orders service and an inventory service,
+or an HR system and a ticketing system. Build an agent that answers questions needing
+both, such as "which customers are affected by this delayed shipment, and have they
+raised a support ticket?" During the demo, add a new endpoint, rebuild with synapse
+build --discover , and show the agent using it straight away.
+Submit: both MCP servers, the agent, and a demo with at least two questions that need
+both systems, plus the live update.
+Judged on: whether answers combine both systems correctly, how real the use case is,
+and how cleanly the update is handled.
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 2 of 8
+===== PAGE 3 =====
+4. Open innovation
+Have your own idea? Build anything you like, as long as Synapse CLI is at its core: use it to
+turn real code into an MCP server that an agent depends on. Bring a codebase from any
+domain (healthcare, finance, education, developer tools, government services, gaming)
+and show what becomes possible once an agent can use it.
+A few starting points, if you want one: a voice or chat assistant for a small business's
+existing booking system, an agent that triages bugs using your team's issue tracker and
+codebase, or a study copilot built on top of a college's course portal.
+Submit: the repo, your MCP setup, a short write-up of the problem and why Synapse fits
+it, and a demo of the agent solving it end to end.
+Judged on: originality and real-world value, how central Synapse is to the solution,
+technical execution, and the quality of the demo.
+Small sample apps are fine for every track. What matters is how the agent uses the
+system, not the size of the system.
+Getting started with Synapse
+You can go from install to a working MCP server in a few minutes. You need Node.js 20 or
+later.
+1. Install the CLI.
+npm install -g @2ndbrainlabs-ai/synapse-cli
+synapse --version
+2. Get a Synapse API key from the Synapse console, following the configuration docs.
+Skip this step if you only plan to build with --local  (see Running locally).
+3. Initialise your project. Run this inside the codebase you want to make agent-ready,
+and paste your key when asked.
+cd my-project
+synapse init
+4. Build the MCP server. Synapse scans your code, then asks whether to build in Auto or
+Custom mode.
+synapse build
+5. Connect it to your agent. Copy the JSON snippet Synapse prints into your MCP
+client's config (see Connecting to an MCP client).
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 3 of 8
+===== PAGE 4 =====
+To describe the tool you want instead of picking endpoints, use Custom mode with a
+query:
+synapse build --custom --query "Expose user auth and profile lookup as one 
+MCP tool"
+Run synapse info  at any time to see your project state and remaining quota.
+Build modes: Auto and Custom
+Use Auto to expose an app's HTTP API as tools; use Custom to combine Python functions
+into one tool.
+Things to know before you build:
+Every generated server file is Python. Synapse never writes a TypeScript or
+JavaScript server.
+Plain JavaScript ( .js , .jsx ) is not scanned. Use a TypeScript, Python, Java, C#, Go
+or Rust project.
+--smart-names  (Auto only) reads each selected handler and your README to give
+tools clearer names and descriptions. Agents pick the right tool more often with good
+names.
+Picking endpoints without the menu
+When there's no terminal (CI, scripts), pass the endpoints as a flag:
+Auto ( --auto ) Custom ( --custom )
+What it does Finds your HTTP routes and
+exposes the ones you pick as MCP
+tools that call your deployed API
+Composes the internal functions
+you pick (or describe with --
+query ) into one MCP tool
+Languages it
+reads
+Python, TypeScript ( .ts , .tsx ),
+Java, C#, Go, Rust
+Python only
+Hosted
+output
+No file written; the config is saved
+to your Synapse account and served
+by the @2ndbrainlabs-ai/synapse-
+mcp  runner via npx
+A Python file,
+<tool_name>_server.py , in the
+project root
+--local
+output
+synapse_auto_server.py  (Python
+projects only)
+<tool_name>_server.py  (Python
+projects only)
+Best for Problem statements 1 and 3 Problem statement 2
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 4 of 8
+===== PAGE 5 =====
+synapse build --auto --all-endpoints
+synapse build --auto --endpoints "GET /patients,POST /patients"
+Rebuilding after code changes
+Later builds update the same MCP server, so your client config keeps working. Synapse
+reuses its last scan until you ask it to rescan:
+synapse build --discover    # rescan; only changed files are parsed again
+This is the command problem statement 3 uses for its live update. Use --new  to create a
+second server, or --server-name <name>  to choose one.
+Running locally with your own model
+Add --local  to build on your own model key: no Synapse account, no quota, and your
+code never goes to Synapse.
+export ANTHROPIC_API_KEY=sk-ant-…
+cd my-project
+synapse build --local
+synapse init  is not needed for local builds. Switch providers with synapse model set
+<provider> :
+For example, with Groq:
+Provider set  id Key environment variable
+Anthropic (default) anthropic ANTHROPIC_API_KEY
+OpenAI openai OPENAI_API_KEY
+Groq groq GROQ_API_KEY
+xAI (Grok) grok XAI_API_KEY
+OpenRouter openrouter OPENROUTER_API_KEY
+Ollama ollama none needed
+Amazon Bedrock bedrock your AWS credentials
+Google Vertex AI vertex your Google Cloud credentials
+Your own endpoint custom SYNAPSE_LLM_API_KEY  (optional)
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 5 of 8
+===== PAGE 6 =====
+export GROQ_API_KEY=gsk_…
+synapse model set groq
+synapse build --local
+Run synapse model  to check which provider and key a build will use, and where the key
+came from.
+Limits of local mode:
+Only Python projects get a generated file. On TypeScript, Java, C#, Go or Rust, local
+Auto mode can name the tools but writes no file; use a hosted build instead.
+Small local models often fail. Code generation needs a model that can follow a strict
+schema. If you see returned no emit_tool_plan call , switch to a stronger model.
+Connecting to an MCP client
+After every build, Synapse prints a ready-made JSON snippet: paste it into your MCP
+client's config and restart the client.
+Hosted Auto builds write no file. The snippet runs the @2ndbrainlabs-ai/synapse-
+mcp  runner through npx , with your SYNAPSE_SERVER_ID . Rebuilds keep the same
+server id, so you paste it once.
+Custom builds and --local  builds write a Python server file into your project
+( <tool_name>_server.py  or synapse_auto_server.py ). Point your client at that file.
+Where the config lives:
+Claude Desktop: Settings → Developer → Edit Config, then add the snippet under
+mcpServers .
+Cursor: Settings → MCP, then add a new server with the snippet.
+Any other MCP-compatible client: add it wherever that client lists its MCP servers.
+Always use the snippet Synapse prints rather than writing one by hand, since it carries
+the right server id and command for your build. If the agent can't see your tools, restart
+the client and check that your app's API is running and reachable.
+Cheat sheet and tips
+These commands cover almost everything teams need during the hackathon.
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 6 of 8
+===== PAGE 7 =====
+Tips for teams
+Plan for quota. The free tier allows 10 MCP servers and 100,000 indexed lines per
+account. Rebuilding an unchanged repo costs nothing, and --local  builds are never
+counted.
+Choose the right language. Custom mode (problem statement 2) reads Python only.
+Plain JavaScript projects aren't scanned at all.
+Expose only what the agent needs. Fewer, well-named tools make agents more
+reliable, and it counts in judging.
+Keep secrets out of code. Headers are sent as ${ENV}  placeholders; keep real tokens
+in environment variables.
+Know what leaves your machine. Hosted Auto sends endpoint names, routes and
+docstrings. --smart-names  and Custom mode also send function details or source to
+Synapse or your chosen model. Use --local  if your code is sensitive.
+Command What it does
+synapse init Set up Synapse in the current project with
+your API key
+synapse build Scan the code and generate an MCP server
+(asks Auto or Custom)
+synapse build --auto --all-endpoints Auto build exposing every detected
+endpoint, no menu
+synapse build --custom -q "
+<description>"
+Custom build of one tool from your
+description
+synapse build --smart-names Better tool names and descriptions (Auto
+only)
+synapse build --discover Rescan the code after changes
+synapse build --resume Finish a scan that was paused or interrupted
+synapse build --local Build on your own model key, no quota
+synapse model set <provider> Choose the model provider for local builds
+synapse info Show project state and remaining quota
+synapse config Show which API key is in use and where it
+came from
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 7 of 8
+===== PAGE 8 =====
+Opt out of telemetry with SYNAPSE_TELEMETRY=0  if you prefer. Telemetry never
+includes code or prompts.
+Common errors
+References
+Start with the getting-started docs, then use the README for flags and edge cases.
+Synapse getting started docs: setup and API keys
+Synapse API reference
+Synapse CLI on GitHub: full README, commands, troubleshooting, issues and
+discussions
+Synapse examples: sample projects to start from
+Synapse console: create and manage API keys
+Synapse CLI on npm
+Model Context Protocol: the standard Synapse generates servers for
+About 2nd Brain Labs
+Message Fix
+Not Initialized Run synapse init
+Quota Exceeded Check synapse info , or build with --local
+AUTH_INVALID Save a valid key with synapse config set-key
+Endpoint Selection Required Add --all-endpoints  or --endpoints <list>
+returned no emit_tool_plan call Your local model is too small; switch to a stronger
+one
+SERVER_ERROR A Synapse-side issue; report it with the Session:
+id
+2nd Brain Labs × Geek Room: Vibe-a-thon Hackathon Problem Statements
+Page 8 of 8

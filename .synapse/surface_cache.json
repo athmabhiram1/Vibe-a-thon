@@ -1,0 +1,180 @@
+{
+  "version": 1,
+  "repo_hash": "db7e23e21b83eccd9100eb1daabf22f01cde69f1628a8ce66eb8035dae46477f",
+  "language": "python",
+  "framework": "fastapi",
+  "package_import_root": "it_service",
+  "captured_functions": false,
+  "files": {
+    "it_service\\main.py": {
+      "sha": "b1a50a38d6c52fa4f2a4da3e936507f748bdc1aa95a4ffd07c31b3e9318a61e3",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/health",
+          "handler_module": "it_service.main",
+          "handler_qualname": "it_health_check",
+          "description": "Liveness probe.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "it_health_check",
+          "file_path": "it_service\\main.py",
+          "start_line": 11,
+          "end_line": 13
+        }
+      ],
+      "functions": []
+    },
+    "undefined": {},
+    "it_service\\routers\\live_moment.py": {
+      "sha": "8ff73a33d759780a58c4c66d3843f3d22bdfe2195bc6d566a5e2c60fccbffb66",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/oncall-coverage",
+          "handler_module": "it_service.routers.live_moment",
+          "handler_qualname": "it_oncall_coverage",
+          "description": "Join the on-call person for a team against open breaching tickets.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "it_oncall_coverage",
+          "file_path": "it_service\\routers\\live_moment.py",
+          "start_line": 70,
+          "end_line": 114
+        }
+      ],
+      "functions": []
+    },
+    "hr_service\\main.py": {
+      "sha": "0dbda05d680f8e20fbd217d23135175404450efbf437c7bc68a9b444e96ef7fb",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/health",
+          "handler_module": "hr_service.main",
+          "handler_qualname": "hr_health_check",
+          "description": "Liveness probe.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_health_check",
+          "file_path": "hr_service\\main.py",
+          "start_line": 11,
+          "end_line": 13
+        }
+      ],
+      "functions": []
+    },
+    "hr_service\\routers\\hr.py": {
+      "sha": "c6d1cacf9aa13953db61a2df61ba48c32547eea4bc074db6018660c7ae3522dc",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/candidates",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_list_candidates",
+          "description": "List hiring candidates, optionally filtered by team.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_list_candidates",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 122,
+          "end_line": 128
+        },
+        {
+          "method": "GET",
+          "path": "/candidates/{candidate_id}",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_get_candidate",
+          "description": "Get one candidate by ID prior to converting to employee.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_get_candidate",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 138,
+          "end_line": 145
+        },
+        {
+          "method": "POST",
+          "path": "/employees",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_create_employee",
+          "description": "Convert hired candidate to employee.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_create_employee",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 157,
+          "end_line": 166
+        },
+        {
+          "method": "GET",
+          "path": "/shifts",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_shift_calendar",
+          "description": "Shift calendar for a team on a date.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_shift_calendar",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 177,
+          "end_line": 183
+        },
+        {
+          "method": "GET",
+          "path": "/oncall",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_get_oncall",
+          "description": "Who is on call for a team at time `at` (default now).",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_get_oncall",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 195,
+          "end_line": 206
+        },
+        {
+          "method": "POST",
+          "path": "/demo/seed",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_demo_seed",
+          "description": "Reload deterministic demo dataset (truncate + 79 rows, one transaction).",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_demo_seed",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 217,
+          "end_line": 246
+        },
+        {
+          "method": "POST",
+          "path": "/demo/reset",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_demo_reset",
+          "description": "Fast restore of the post-seed snapshot (file copy).",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_demo_reset",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 257,
+          "end_line": 275
+        },
+        {
+          "method": "GET",
+          "path": "/demo/status",
+          "handler_module": "hr_service.routers.hr",
+          "handler_qualname": "hr_demo_status",
+          "description": "Seeded flag, per-table counts, seed version.",
+          "payload_example": null,
+          "headers_hint": [],
+          "suggested_tool_name": "hr_demo_status",
+          "file_path": "hr_service\\routers\\hr.py",
+          "start_line": 285,
+          "end_line": 307
+        }
+      ],
+      "functions": []
+    }
+  },
+  "lines_scanned": 775,
+  "updated_at": 1795513275835
+}

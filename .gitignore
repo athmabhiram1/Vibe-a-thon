@@ -1,0 +1,23 @@
+# VIBE_CODE repo hygiene — never commit these.
+# DB files (golden path uses seed/demo.db; runtime creates -wal/-shm sidecars)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+# Python bytecode / caches
+__pycache__/
+*.pyc
+.pytest_cache/
+# Local env with secrets
+.env
+# Demo video — allow only the golden cut
+*.mp4
+!demo/golden.mp4
+
+# nested template repo (own .git + node_modules) + build junk
+workspace-*/
+node_modules/
+.next/
+*.log
+.synapse/discover/
+

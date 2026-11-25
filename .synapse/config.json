@@ -1,0 +1,21 @@
+{
+  "initialized": true,
+  "version": "1.0.0",
+  "mode": "hosted",
+  "created_at": "2026-11-24T08:27:53.032Z",
+  "last_updated": "2026-11-24T09:41:19.540Z",
+  "hosted_servers": {
+    "https://api.synapse.2ndbrainlabs.ai": {
+      "hr-api": {
+        "id": "6269969f-3f80-4a9f-a6e1-43237197dc42",
+        "created_at": "2026-11-24T09:36:55.749Z",
+        "updated_at": "2026-11-24T09:41:19.538Z"
+      },
+      "it-api": {
+        "id": "5fe96a56-ccb4-4483-a7e2-5a9cd2588b15",
+        "created_at": "2026-11-24T09:37:27.905Z",
+        "updated_at": "2026-11-24T09:37:27.905Z"
+      }
+    }
+  }
+}

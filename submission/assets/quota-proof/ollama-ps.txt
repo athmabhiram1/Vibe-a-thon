@@ -1,0 +1,28 @@
+# `ollama ps` + `ollama list` — quota proof (text screenshot-equivalent, 2026-11-24)
+
+> Text capture (no pixels faked): raw `ollama ps` / `ollama list` stdout
+> pasted below. `ollama-ps.png` in this dir is a monospaced rendering of
+> this exact text — not a screengrab. Spend: local inference = ₹0 / $0.
+
+```text
+$ ollama ps
+NAME    ID    SIZE    PROCESSOR    CONTEXT    RUNNER    UNTIL
+(no resident models loaded at capture time)
+
+$ ollama list
+NAME                    ID              SIZE      MODIFIED
+qwen2.5-coder:7b        dae161e27b0e    4.7 GB    12 minutes ago
+tev1:4b                 7954dce22bc6    4.6 GB    7 days ago
+llama3.1:8b             46e0c10c039e    4.9 GB    2 months ago
+llama3.2:3b             a80c4f17acd5    2.0 GB    3 months ago
+qwen3:8b                500a1f067a9f    5.2 GB    3 months ago
+qwen3-embedding:0.6b    ac6da0dfba84    639 MB    3 months ago
+```
+
+- Target model `qwen2.5-coder:7b` (4.7 GB) IS pulled — supersedes the
+  earlier "neither target model pulled" note (LIMITS.md AI-local row).
+  `tev1:4b` (4.6 GB) also present.
+- Nothing resident in VRAM/CPU at capture (`ollama ps` empty), so P2
+  local-fallback cost at freeze = 0 GB resident, ₹0 spend.
+- Prior measurement for reference: `qwen3:8b` resident 6.7 GB CPU
+  (`ollama ps` 2026-11-24, earlier same day).

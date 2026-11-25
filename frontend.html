@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboard Copilot — Track 3 · HR × IT</title>
+<!--
+  Onboard Copilot — Track 3 demo UI (single file, vanilla JS + fetch, no build step).
+  Backends: HR http://localhost:8001 (/hr…), IT http://localhost:8002 (/it…).
+  operationIds (code-authoritative): hr_list_candidates, hr_get_candidate,
+  hr_create_employee, hr_shift_calendar, hr_get_oncall, it_list_equipment,
+  it_assign_laptop, it_create_ticket, it_sla_breach_list, it_get_ticket,
+  it_reroute_ticket (+ demo seed/reset/status).
+  NOTE (route-order trap, 15-endpoints.md §3): the IT server MUST declare the
+  static route GET /it/tickets/breaches BEFORE GET /it/tickets/{ticket_id}.
+  This file always calls "/it/tickets/breaches" as a literal string and never
+  builds it by interpolating the get-ticket path — frontend cannot depend on
+  server route-registration order, so a 404 there is surfaced verbatim.
+-->
+<style>
+  :root{
+    --bg:#0A0A0A; --panel:#141414; --panel2:#1C1C1C; --ink:#FFFFFF;
+    --muted:#E8E8E8; --dim:#C9C9C9;
+    --accent:#FFD400; --red:#FF6B6B; --red-deep:#D00000;
+    --green:#3DDC84; --green-deep:#007A33;
+    --amber:#FFB300; --line:#3A3A3A; --focus:#7DD3FC;
+  }
+  *{box-sizing:border-box}
+  html{font-size:18pt;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:Georgia,"Times New Roman",serif;
+    line-height:1.45;
+  }
+  button,input,select,textarea{font:inherit}
+  :focus-visible{outline:3px solid var(--focus); outline-offset:2px}
+  header.topbar{
+    display:flex; flex-wrap:wrap; gap:.5rem 1rem; align-items:center;
+    padding:.6rem .9rem; border-bottom:3px solid var(--accent); background:#000;
+  }
+  .track-pill{
+    font-family:Verdana,Arial,sans-serif; font-weight:700; letter-spacing:.06em;
+    background:var(--accent); color:#000; padding:.15rem .6rem; border-radius:999px;
+    white-space:nowrap;
+  }
+  h1{font-size:1.15rem; margin:0}
+  .base-row{display:flex; flex-wrap:wrap; gap:.4rem .8rem; align-items:center; font-size:.85rem}
+  .base-row label{font-family:Verdana,Arial,sans-serif; font-size:.7rem; color:var(--dim)}
+  .base-row input{
+    width:11rem; background:#000; color:var(--ink); border:2px solid var(--line);
+    border-radius:.3rem; padding:.25rem .4rem; font-size:.75rem;
+    font-family:Consolas,Menlo,monospace;
+  }
+  .dot{font-weight:700}
+  .dot.ok{color:var(--green)} .dot.slow{color:var(--amber)} .dot.down{color:var(--red)}
+  .btn{
+    font-family:Verdana,Arial,sans-serif; font-weight:700; font-size:.8rem;
+    min-height:48px; padding:.4rem .9rem; border-radius:.4rem; cursor:pointer;
+    border:2px solid var(--ink); background:#000; color:var(--ink);
+  }
+  .btn:hover{background:#222}
+  .btn:disabled{opacity:.45; cursor:not-allowed}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#000}
+  .btn.primary:hover{background:#ffe14d}
+  .btn.danger{border-color:var(--red); color:var(--red)}
+  .btn.small{min-height:44px; font-size:.72rem; padding:.3rem .6rem}
+  .hero{padding:.55rem .9rem; border-bottom:2px solid var(--line); background:var(--panel)}
+  .hero p{margin:.15rem 0; font-size:.85rem}
+  .hero .tagline{font-family:Verdana,Arial,sans-serif; font-weight:700; color:var(--accent); font-size:.9rem}
+  main{
+    display:grid; grid-template-columns:340px minmax(0,1fr) 380px;
+    gap:.7rem; padding:.7rem .9rem; align-items:start;
+    max-width:100%;
+  }
+  section.col{display:flex; flex-direction:column; gap:.7rem; min-width:0}
+  .pane{
+    background:var(--panel); border:2px solid var(--line); border-radius:.5rem;
+    padding:.6rem .7rem; min-width:0;
+  }
+  .pane h2{
+    font-family:Verdana,Arial,sans-serif; font-size:.85rem; letter-spacing:.03em;
+    margin:0 0 .4rem; display:flex; align-items:center; gap:.4rem; justify-content:space-between;
+  }
+  .pane h2 .ttl{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .card{
+    border:2px solid var(--line); border-radius:.4rem; padding:.4rem .5rem;
+    margin:.35rem 0; background:var(--panel2); cursor:pointer; font-size:.78rem;
+  }
+  .card[aria-selected="true"]{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent)}
+  .card:hover{border-color:var(--ink)}
+  .card .mono{font-family:Consolas,Menlo,monospace; font-size:.72rem; color:var(--dim)}
+  .verdict{
+    border-radius:.35rem; padding:.35rem .55rem; margin:.4rem 0;
+    font-family:Verdana,Arial,sans-serif; font-size:.78rem; font-weight:700;
+  }
+  .verdict.ok{background:#00331a; color:var(--green); border:2px solid var(--green)}
+  .verdict.warn{background:#3a2a00; color:var(--amber); border:2px solid var(--amber)}
+  .verdict.err{background:#3d0000; color:var(--red); border:2px solid var(--red)}
+  .verdict.info{background:#0b2a3a; color:var(--focus); border:2px solid var(--focus)}
+  pre.json{
+    background:#000; border:2px solid var(--line); border-radius:.4rem;
+    padding:.5rem; font-size:.72rem; line-height:1.5; overflow:auto; max-height:16rem;
+    font-family:Consolas,Menlo,monospace; color:#F5F5F5; white-space:pre-wrap; word-break:break-word;
+  }
+  .preview{border:3px solid var(--accent); border-radius:.5rem; padding:.6rem .7rem; background:#141000}
+  .preview h2{font-family:Verdana,Arial,sans-serif; font-size:.85rem; margin:0 0 .4rem; color:var(--accent)}
+  .receipt{border:3px solid var(--green); border-radius:.5rem; padding:.6rem .7rem; background:#00130a}
+  .receipt h2{font-family:Verdana,Arial,sans-serif; font-size:.85rem; margin:0 0 .4rem; color:var(--green)}
+  .rowline{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin:.35rem 0}
+  .rowline label{font-family:Verdana,Arial,sans-serif; font-size:.72rem; color:var(--dim)}
+  .rowline input,.rowline select{
+    background:#000; color:var(--ink); border:2px solid var(--line);
+    border-radius:.3rem; padding:.3rem .45rem; font-size:.78rem; max-width:100%;
+  }
+  .audit-row{
+    border-bottom:1px solid var(--line); padding:.3rem 0; font-size:.72rem;
+    font-family:Consolas,Menlo,monospace; word-break:break-word;
+  }
+  .audit-allow{color:var(--green)} .audit-deny{color:var(--red)} .audit-sys{color:var(--dim)}
+  footer.statusbar{
+    position:sticky; bottom:0; background:#000; border-top:3px solid var(--accent);
+    padding:.45rem .9rem; font-family:Consolas,Menlo,monospace; font-size:.72rem;
+    display:flex; flex-wrap:wrap; gap:.4rem 1.2rem; color:var(--muted);
+  }
+  #toasts{position:fixed; right:.8rem; bottom:3rem; display:flex; flex-direction:column; gap:.4rem; max-width:min(26rem,90vw); z-index:50}
+  .toast{
+    background:#000; border:2px solid var(--ink); border-radius:.4rem; padding:.45rem .6rem;
+    font-size:.75rem; font-family:Consolas,Menlo,monospace; word-break:break-word;
+  }
+  .toast.err{border-color:var(--red); color:#ffd9d9}
+  .toast.ok{border-color:var(--green)}
+  .skel{color:var(--dim); font-size:.8rem}
+  .kbd-hint{font-size:.68rem; color:var(--dim); font-family:Verdana,Arial,sans-serif}
+  table.tools{width:100%; border-collapse:collapse; font-size:.68rem; font-family:Consolas,Menlo,monospace}
+  table.tools td,table.tools th{border:1px solid var(--line); padding:.15rem .3rem; text-align:left; word-break:break-word}
+  @media (max-width:900px){
+    main{grid-template-columns:minmax(0,1fr)}
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <span class="track-pill">TRACK 3</span>
+  <h1>Onboard Copilot — HR × IT</h1>
+  <div class="base-row" role="group" aria-label="Backend bases and health">
+    <span>HR <span id="hrDot" class="dot" title="unknown">● ?:??</span></span>
+    <label for="hrBase">HR base</label>
+    <input id="hrBase" value="http://localhost:8001" spellcheck="false">
+    <span>IT <span id="itDot" class="dot" title="unknown">● ?:??</span></span>
+    <label for="itBase">IT base</label>
+    <input id="itBase" value="http://localhost:8002" spellcheck="false">
+  </div>
+  <div class="base-row" role="group" aria-label="Demo controls">
+    <button class="btn small" id="seedBtn">🌱 Seed</button>
+    <button class="btn small" id="resetBtn">♻️ Reset</button>
+    <button class="btn small" id="statusBtn">📡 Status</button>
+    <span id="toolCount" aria-live="polite">Tools seen: 0/14</span>
+  </div>
+  <div class="base-row" role="group" aria-label="Font size">
+    <button class="btn small" data-font="18">A- 18pt</button>
+    <button class="btn small" data-font="22">A 22pt</button>
+    <button class="btn small" data-font="26">A+ 26pt</button>
+  </div>
+</header>
+
+<div class="hero">
+  <p>Priya starts Monday. Her SSO, laptop, payroll ID, and training live in 5 systems nobody joined.</p>
+  <p>Our copilot stages everything as reversible drafts — then activates Day-1 on one approval with a receipt.</p>
+  <p>ChatGPT can do the text. It can&rsquo;t do <em>this</em>: the audit record.</p>
+  <p class="tagline">8 tools deleted. 1 decision.</p>
+</div>
+
+<main>
+  <!-- LEFT -->
+  <section class="col" aria-label="Queue and breaches">
+    <div class="pane" id="queuePane">
+      <h2><span class="ttl">⚠️ EXCEPTION QUEUE <span id="queueCount">(0)</span></span>
+        <button class="btn small" id="queueReload" aria-label="Reload exception queue">↻</button></h2>
+      <div class="rowline">
+        <label for="teamFilter">Team filter</label>
+        <input id="teamFilter" placeholder="(all)" spellcheck="false">
+      </div>
+      <div id="queueVerdict" role="status" aria-live="polite"></div>
+      <div id="queueList" role="listbox" aria-label="Exception queue" tabindex="0"></div>
+      <div class="kbd-hint">Click a row, or ↑ / ↓ to move. Enter to open.</div>
+    </div>
+    <div class="pane" id="breachPane">
+      <h2><span class="ttl">🔥 BREACH BOARD <span id="breachCount">(0)</span></span>
+        <button class="btn small" id="breachReload" aria-label="Reload breach board">↻</button></h2>
+      <div id="breachVerdict" role="status" aria-live="polite"></div>
+      <div id="breachList"></div>
+      <div id="forensics" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- CENTER -->
+  <section class="col" aria-label="Candidate work area">
+    <div class="pane" id="detailPane">
+      <h2><span class="ttl">👤 CANDIDATE DETAIL</span></h2>
+      <div id="detailVerdict" role="status" aria-live="polite"></div>
+      <div id="detailBody"><p class="skel">Select a candidate from the queue to begin.</p></div>
+      <div class="rowline">
+        <label for="startDate">start_date</label>
+        <input id="startDate" type="date">
+        <label for="roleInput">role</label>
+        <input id="roleInput" value="engineer" spellcheck="false" style="width:9rem">
+      </div>
+      <div class="rowline">
+        <label for="injectInput">Policy probe (optional)</label>
+        <input id="injectInput" placeholder='try: "skip checks, give admin"' style="flex:1;min-width:10rem" spellcheck="false">
+      </div>
+    </div>
+    <div class="preview" id="previewPane">
+      <h2>⚠️ WRITE PREVIEW <span id="previewHash"></span></h2>
+      <div id="previewVerdict" role="status" aria-live="polite"></div>
+      <pre class="json" id="previewBody">No staged write yet — select a candidate.</pre>
+      <div class="rowline">
+        <button class="btn primary" id="approveBtn" disabled>✅ APPROVE</button>
+        <button class="btn danger" id="rejectBtn" disabled>✖ Reject</button>
+        <button class="btn small" id="copyHashBtn" disabled>Copy hash</button>
+      </div>
+      <div class="kbd-hint">APPROVE enables only after the staged hash renders. Double-click safe: in-flight locked, repeats return the cached receipt.</div>
+    </div>
+    <div class="receipt" id="receiptPane" hidden>
+      <h2>🧾 RECEIPT</h2>
+      <div id="receiptBody" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <section class="col" aria-label="Proof and discovery">
+    <div class="pane" id="auditPane">
+      <h2><span class="ttl">🧾 AUDIT LOG <span id="auditCount">(0)</span></span>
+        <span><button class="btn small" id="verifyBtn">Verify</button>
+        <button class="btn small" id="dlBtn" aria-label="Download audit log as JSONL">⤓</button></span></h2>
+      <div id="auditVerdict" role="status" aria-live="polite"></div>
+      <div id="auditList"><p class="skel">No actions yet — approve to write the first row.</p></div>
+    </div>
+    <div class="pane" id="discoveryPane">
+      <h2><span class="ttl">📡 DISCOVERY STATUS</span></h2>
+      <div id="discVerdict" role="status" aria-live="polite"></div>
+      <div id="discBody"><p class="skel">Press “Check on-call”.</p></div>
+      <div class="rowline">
+        <button class="btn small" id="oncallBtn">Check on-call</button>
+        <button class="btn small" id="repolBtn">Re-poll</button>
+      </div>
+      <div id="rerouteZone"></div>
+      <div class="pane" style="border-width:1px;margin-top:.5rem" id="toolPane">
+        <h2><span class="ttl">TOOLS (live)</span>
+          <button class="btn small" id="toolRefresh">Refresh</button></h2>
+        <div id="toolList"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="statusbar" aria-live="polite">
+  <span id="lastFetch">last fetch: —</span>
+  <span id="footTools">tools seen: 0/14</span>
+  <span id="footSeed">seeded_at: unknown</span>
+</footer>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============ bases + helpers ============ */
+var $ = function(id){ return document.getElementById(id); };
+var HR = function(){ return $("hrBase").value.replace(/\/$/,""); };
+var IT = function(){ return $("itBase").value.replace(/\/$/,""); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function qs(obj){ var p=new URLSearchParams(); Object.keys(obj).forEach(function(k){
+  if(obj[k]!==undefined&&obj[k]!=null&&obj[k]!=="") p.append(k,obj[k]); }); return p.toString(); }
+function uuid(){ if(window.crypto&&crypto.randomUUID) return crypto.randomUUID();
+  return "id-"+Date.now()+"-"+Math.floor(Math.random()*1e9); }
+async function sha256hex(s){
+  try{
+    if(window.crypto&&crypto.subtle){
+      var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+      return Array.prototype.map.call(new Uint8Array(b),function(x){
+        return ("0"+x.toString(16)).slice(-2); }).join("");
+    }
+  }catch(e){/* fall through to local hash */}
+  var h1=0xdeadbeef,h2=0x41c6ce57,i;
+  for(i=0;i<s.length;i++){ var ch=s.charCodeAt(i);
+    h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677); }
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (h2>>>0).toString(16).padStart(8,"0")+(h1>>>0).toString(16).padStart(8,"0")+"-local";
+}
+function footer(msg){ $("lastFetch").textContent="last fetch: "+msg; }
+function toast(msg,cls){
+  var d=document.createElement("div"); d.className="toast "+(cls||"");
+  d.textContent=msg; $("toasts").appendChild(d);
+  while($("toasts").children.length>5) $("toasts").removeChild($("toasts").firstChild);
+  setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); },9000);
+}
+function verdict(el,cls,msg){ el.innerHTML='<div class="verdict '+cls+'">'+esc(msg)+"</div>"; }
+
+/* ============ live tool registry (dynamic — Refresh re-probes) ============ */
+var TOOLS=[
+  {op:"hr_list_candidates",   call:"H1", path:"/hr/candidates"},
+  {op:"hr_get_candidate",     call:"H2", path:"/hr/candidates/{id}"},
+  {op:"hr_create_employee",   call:"H3", path:"POST /hr/employees"},
+  {op:"hr_shift_calendar",    call:"H4", path:"/hr/shifts"},
+  {op:"hr_get_oncall",        call:"H5", path:"/hr/oncall"},
+  {op:"it_list_equipment",    call:"I1", path:"/it/equipment"},
+  {op:"it_assign_laptop",     call:"I2", path:"POST /it/equipment/assign"},
+  {op:"it_sla_breach_list",   call:"I6", path:"/it/tickets/breaches"},
+  {op:"it_get_ticket",        call:"I4", path:"/it/tickets/{id}"},
+  {op:"it_reroute_ticket",    call:"I5", path:"POST /it/tickets/{id}/reroute"},
+  {op:"it_create_ticket",     call:"I3", path:"POST /it/tickets"},
+  {op:"demo_seed",            call:"D1", path:"POST /demo/seed"},
+  {op:"demo_reset",           call:"D2", path:"POST /demo/reset"},
+  {op:"demo_status",          call:"D3", path:"GET /demo/status"}
+];
+var seenTools={};
+function markSeen(op){ if(!seenTools[op]){ seenTools[op]=true; renderTools(); } }
+function renderTools(){
+  var n=Object.keys(seenTools).length;
+  $("toolCount").textContent="Tools seen: "+n+"/"+TOOLS.length;
+  $("footTools").textContent="tools seen: "+n+"/"+TOOLS.length;
+  $("toolList").innerHTML="<table class=\"tools\"><tr><th>call</th><th>operation</th><th>seen</th></tr>"+
+    TOOLS.map(function(t){ return "<tr><td>"+esc(t.call)+"</td><td>"+esc(t.op)+
+      "</td><td>"+(seenTools[t.op]?"✅":"·")+"</td></tr>"; }).join("")+"</table>";
+}
+
+/* ============ fetch core (timeout + status+body errors, never silent) ============ */
+async function api(base,path,opts){
+  opts=opts||{};
+  var t0=performance.now();
+  var init={method:opts.method||"GET",
+    headers:Object.assign({"Content-Type":"application/json"},(opts.headers||{}))};
+  if(opts.body!==undefined) init.body=opts.body;
+  if(window.AbortSignal&&AbortSignal.timeout){ init.signal=AbortSignal.timeout(10000); }
+  var res;
+  try{ res=await fetch(base+path,init); }
+  catch(e){ var em=""+(e&&e.message?e.message:e);
+    var why=(e&&e.name==="TimeoutError")||/timed out|timeout/i.test(em)
+      ?"timed out after 10s":"fetch failed ("+em.slice(0,160)+")";
+    footer(path+" → FETCH-FAIL · "+Math.round(performance.now()-t0)+"ms");
+    throw new Error(path+" → "+why+". Is uvicorn on 8001/8002 running (CORS allow_origins=[\"*\"])?"); }
+  var ms=Math.round(performance.now()-t0);
+  footer(path+" → "+res.status+" · "+ms+"ms");
+  if(!res.ok){ var txt=""; try{ txt=await res.text(); }catch(e2){}
+    throw new Error(path+" → HTTP "+res.status+": "+String(txt).slice(0,200)); }
+  if(res.status===204) return null;
+  try{ return await res.json(); }
+  catch(e){ throw new Error(path+" → HTTP "+res.status+" with non-JSON body"); }
+}
+
+/* ============ state ============ */
+var state={ candidates:[], breaches:[], selected:null, detail:null,
+  equipment:[], laptop:null, staged:null, hash:null, receiptCache:{},
+  approving:false, oncall:null, queueIx:0 };
+var audit=[]; var auditSeq=0;
+
+/* ============ audit chain (sha256(prev‖canonical)) ============ */
+async function addAudit(kind,action,detail){
+  auditSeq+=1;
+  var prev=audit.length?audit[audit.length-1].hash:"GENESIS";
+  var canonical=JSON.stringify({seq:auditSeq,kind:kind,action:action,detail:detail,prev:prev});
+  var h=await sha256hex(canonical);
+  audit.push({seq:auditSeq,kind:kind,action:action,detail:detail,prev:prev,hash:h,at:new Date().toISOString()});
+  renderAudit();
+}
+function renderAudit(){
+  $("auditCount").textContent="("+audit.length+")";
+  if(!audit.length){ $("auditList").innerHTML="<p class=\"skel\">No actions yet — approve to write the first row.</p>"; return; }
+  $("auditList").innerHTML=audit.slice().reverse().map(function(a){
+    var cls=a.kind==="ALLOW"?"audit-allow":(a.kind==="DENY"?"audit-deny":"audit-sys");
+    return "<div class=\"audit-row "+cls+"\">#"+a.seq+" "+esc(a.kind)+" "+esc(a.action)+
+      " · "+esc(String(a.hash).slice(0,12))+"… ✓ prev-linked<br><span style=\"color:var(--dim)\">"+
+      esc(a.detail)+" · "+esc(a.at)+"</span></div>";
+  }).join("");
+}
+async function verifyChain(){
+  var prev="GENESIS";
+  for(var i=0;i<audit.length;i++){ var a=audit[i];
+    if(a.prev!==prev){ verdict($("auditVerdict"),"err","⛔ CHAIN BREAK at seq #"+a.seq); return; }
+    var h=await sha256hex(JSON.stringify({seq:a.seq,kind:a.kind,action:a.action,detail:a.detail,prev:a.prev}));
+    if(h!==a.hash){ verdict($("auditVerdict"),"err","⛔ HASH MISMATCH at seq #"+a.seq); return; }
+    prev=a.hash;
+  }
+  verdict($("auditVerdict"),"ok","✅ Chain OK — "+audit.length+" rows verified, hashes linked.");
+}
+
+/* ============ health (D3 with H1+I6 fallback) ============ */
+function setDot(which,cls,ms,hint){
+  var el=which==="HR"?$("hrDot"):$("itDot");
+  el.className="dot "+cls; el.textContent="● "+(which==="HR"?":8001":":8002")+" "+ms+"ms";
+  el.title=hint||"";
+}
+async function health(){
+  var t0=performance.now();
+  try{ var s=await api(HR(),"/demo/status"); markSeen("demo_status");
+    var ms=Math.round(performance.now()-t0);
+    setDot("HR",ms<1000?"ok":"slow",ms,"demo/status 200");
+    if(s&&s.seeded_at) $("footSeed").textContent="seeded_at: "+s.seeded_at;
+  }catch(e){
+    try{ await api(HR(),"/hr/candidates?"+qs({limit:1})); markSeen("hr_list_candidates");
+      var ms2=Math.round(performance.now()-t0);
+      setDot("HR",ms2<1000?"ok":"slow",ms2,"fallback probe H1 (demo/status absent)");
+    }catch(e2){ setDot("HR","down",0,String(e2.message).slice(0,200));
+      toast("🔴 HR :8001 unreachable — is uvicorn up? "+String(e2.message).slice(0,200),"err"); }
+  }
+  var u0=performance.now();
+  try{ await api(IT(),"/it/tickets/breaches"); markSeen("it_sla_breach_list");
+    var ms3=Math.round(performance.now()-u0);
+    setDot("IT",ms3<1000?"ok":"slow",ms3,"breach probe 200");
+  }catch(e3){ setDot("IT","down",0,String(e3.message).slice(0,200));
+    toast("🔴 IT :8002 unreachable — is uvicorn up? "+String(e3.message).slice(0,200),"err"); }
+}
+
+/* ============ H1 queue ============ */
+async function loadQueue(){
+  var box=$("queueList");
+  box.innerHTML="<p class=\"skel\">⏳ loading …</p>";
+  try{
+    var team=$("teamFilter").value.trim();
+    var list=await api(HR(),"/hr/candidates?"+qs({team:team||undefined,limit:20}));
+    markSeen("hr_list_candidates");
+    state.candidates=Array.isArray(list)?list:[];
+    renderQueue();
+    verdict($("queueVerdict"),"ok","✅ "+state.candidates.length+" candidates loaded (H1 hr_list_candidates).");
+    var pref=state.candidates.findIndex(function(c){return c.candidate_id==="CAND-002";});
+    selectByIx(pref>=0?pref:0,true);
+  }catch(e){
+    box.innerHTML="";
+    verdict($("queueVerdict"),"err","🔴 HR :8001 unreachable — is uvicorn up? [Retry]");
+    var b=document.createElement("button"); b.className="btn small"; b.textContent="↻ Retry";
+    b.onclick=loadQueue; $("queueVerdict").appendChild(b);
+    toast(String(e.message).slice(0,200),"err");
+  }
+}
+function renderQueue(){
+  $("queueCount").textContent="("+state.candidates.length+")";
+  var box=$("queueList"); box.innerHTML="";
+  if(!state.candidates.length){
+    box.innerHTML="<p class=\"skel\">✅ Queue clear — all candidates converted.</p>"; return; }
+  state.candidates.forEach(function(c,i){
+    var d=document.createElement("div");
+    d.className="card"; d.setAttribute("role","option");
+    d.setAttribute("aria-selected",state.selected===c.candidate_id?"true":"false");
+    d.tabIndex=-1;
+    d.innerHTML="<strong>"+esc(c.candidate_id)+"</strong> · "+esc(c.name||"")+" · "+esc(c.status||"")+
+      "<br><span class=\"mono\">"+esc(c.email||"")+" · "+esc(c.team||"")+"</span>";
+    d.onclick=function(){ selectByIx(i,false); };
+    box.appendChild(d);
+  });
+}
+function selectByIx(i,silent){
+  if(!state.candidates.length) return;
+  state.queueIx=Math.max(0,Math.min(i,state.candidates.length-1));
+  state.selected=state.candidates[state.queueIx].candidate_id;
+  renderQueue(); loadDetail(state.selected);
+}
+$("queueList").addEventListener("keydown",function(e){
+  if(e.key==="ArrowDown"){ e.preventDefault(); selectByIx(state.queueIx+1); }
+  else if(e.key==="ArrowUp"){ e.preventDefault(); selectByIx(state.queueIx-1); }
+});
+
+/* ============ H2 detail + I1 laptop pick + staging ============ */
+function nextMonday(){
+  var d=new Date(); d.setDate(d.getDate()+((8-d.getDay())%7||7));
+  return d.toISOString().slice(0,10);
+}
+if(!$("startDate").value) $("startDate").value=nextMonday();
+async function loadDetail(id){
+  $("detailBody").innerHTML="<p class=\"skel\">⏳ loading …</p>";
+  $("approveBtn").disabled=true; $("rejectBtn").disabled=true; $("copyHashBtn").disabled=true;
+  $("previewHash").textContent=""; $("previewBody").textContent="No staged write yet — select a candidate.";
+  state.staged=null; state.hash=null;
+  if(state.receiptCache[id]){
+    showReceipt(id,state.receiptCache[id]);
+    verdict($("previewVerdict"),"info","ℹ️ Cached receipt reused for "+id+" (no duplicate POST).");
+  } else { $("receiptPane").hidden=true; }
+  try{
+    var c=await api(HR(),"/hr/candidates/"+encodeURIComponent(id));
+    markSeen("hr_get_candidate");
+    state.detail=c;
+    var inj=$("injectInput").value||"";
+    $("detailBody").innerHTML=
+      "<p><strong>"+esc(c.candidate_id)+"</strong> · "+esc(c.name||"")+"<br>"+
+      "<span class=\"mono\">"+esc(c.email||"")+" · team "+esc(c.team||"")+" · status "+esc(c.status||"")+"</span></p>"+
+      "<p class=\"mono\">citations: H1 hr_list_candidates · H2 hr_get_candidate</p>";
+    verdict($("detailVerdict"),"ok","✅ "+c.candidate_id+" loaded — staging write preview…");
+    await stageWrite(c,inj);
+  }catch(e){
+    verdict($("detailVerdict"),"err","🔴 Detail failed: "+String(e.message).slice(0,200));
+    toast(String(e.message).slice(0,200),"err");
+  }
+}
+function pickLaptop(pool){
+  var free=(pool||[]).filter(function(l){ return l.status==="free"||l.status==="available"; });
+  var traps=[];
+  (pool||[]).forEach(function(l){
+    if(l.serial==="LT-1005"&&traps.indexOf("⚠️ LT-1005 double-hold conflict — skip")<0)
+      traps.push("⚠️ LT-1005 double-hold conflict — skip");
+    if(l.serial==="LT-1012"&&traps.indexOf("⚠️ LT-1012 retired trap — skip")<0)
+      traps.push("⚠️ LT-1012 retired trap — skip");
+  });
+  var lt=free.find(function(l){ return l.serial.indexOf("LT-")===0&&l.serial!=="LT-1005"&&l.serial!=="LT-1012"; });
+  return {choice:lt||free[0]||null,traps:traps,count:free.length};
+}
+async function stageWrite(c,injectText){
+  try{
+    var pool, fullPool=null;
+    try{ pool=await api(IT(),"/it/equipment?"+qs({status:"free",limit:50})); }
+    catch(e){ pool=await api(IT(),"/it/equipment?"+qs({limit:50})); }
+    markSeen("it_list_equipment");
+    try{ fullPool=await api(IT(),"/it/equipment?"+qs({limit:50})); }catch(e2){ fullPool=pool; }
+    state.equipment=Array.isArray(pool)?pool:[];
+    var pick=pickLaptop((state.equipment||[]).concat(Array.isArray(fullPool)?fullPool:[]));
+    state.laptop=pick.choice;
+    if(!state.laptop){
+      verdict($("previewVerdict"),"err","🔴 No free laptop in pool — cannot stage assign. (I1 it_list_equipment empty)");
+      return;
+    }
+    if((injectText||"").toLowerCase().indexOf("skip")>=0){
+      await addAudit("DENY","skip-checks-inject","🛑 DENIED prompt-inject ("+c.candidate_id+"): no POST sent.");
+      verdict($("previewVerdict"),"err","🛑 DENIED — injection text refused in code. No POST sent; denial logged.");
+      toast("🛑 Injection refused — DENY row appended, no POST sent.","err");
+      return;
+    }
+    var empBody={name:c.name,email:c.email,team:c.team,
+      start_date:$("startDate").value||nextMonday(),role:$("roleInput").value||"engineer"};
+    var assignPreview={serial:state.laptop.serial,employee_id:"<EMP from step 1>"};
+    var canonical=JSON.stringify({employee:empBody,assign:{serial:state.laptop.serial}});
+    var h=await sha256hex(canonical);
+    state.hash=h; state.staged={empBody:empBody,serial:state.laptop.serial};
+    var trapLine=pick.traps.length?pick.traps.join(" · "):"pool clean";
+    $("previewHash").textContent="‹"+h.slice(0,6)+"›";
+    $("previewBody").textContent=
+      "Will call: POST /hr/employees "+JSON.stringify(empBody)+"\n"+
+      "+ POST /it/equipment/assign "+JSON.stringify(assignPreview)+"\n"+
+      "hash: sha256(redacted) "+h.slice(0,6)+"…"+h.slice(-4)+"  ["+h+"]\n"+
+      "citations: hr_list_candidates · it_list_equipment\n"+
+      "laptop pool: "+pick.count+" free · "+state.laptop.serial+" ("+(state.laptop.model||"")+") · "+trapLine;
+    verdict($("previewVerdict"),"ok","✅ Staged — hash "+h.slice(0,6)+"… review, then APPROVE.");
+    $("approveBtn").disabled=false; $("approveBtn").textContent="✅ APPROVE "+h.slice(0,6);
+    $("rejectBtn").disabled=false; $("copyHashBtn").disabled=false;
+  }catch(e){
+    verdict($("previewVerdict"),"err","🔴 Preview failed: "+String(e.message).slice(0,200));
+    toast(String(e.message).slice(0,200),"err");
+  }
+}
+
+/* ============ H3+I2 approve (double-submit guard + cached receipt) ============ */
+async function approve(){
+  if(state.approving) return;                       /* double-submit guard */
+  if(!state.staged||!state.hash){ toast("No staged hash — cannot approve.","err"); return; }
+  var id=state.detail?state.detail.candidate_id:null;
+  if(id&&state.receiptCache[id]){ showReceipt(id,state.receiptCache[id]); return; }
+  state.approving=true; $("approveBtn").disabled=true; $("approveBtn").textContent="⏳ APPROVING…";
+  try{
+    verdict($("previewVerdict"),"info","⏳ Step 1/2: POST /hr/employees…");
+    var emp=await api(HR(),"/hr/employees",{method:"POST",
+      headers:{"Idempotency-Key":uuid()},body:JSON.stringify(state.staged.empBody)});
+    markSeen("hr_create_employee");
+    await addAudit("ALLOW","create_employee","EMP "+(emp.employee_id||"?")+" ← "+(state.detail?state.detail.candidate_id:"?")+" · hash "+state.hash.slice(0,6));
+    verdict($("previewVerdict"),"info","⏳ Step 2/2: POST /it/equipment/assign "+state.staged.serial+"…");
+    var asg=await api(IT(),"/it/equipment/assign",{method:"POST",
+      headers:{"Idempotency-Key":uuid()},
+      body:JSON.stringify({serial:state.staged.serial,employee_id:emp.employee_id})});
+    markSeen("it_assign_laptop");
+    await addAudit("ALLOW","assign_laptop",state.staged.serial+" → "+emp.employee_id+" · hash "+state.hash.slice(0,6));
+    var rec={emp:emp,asg:asg,hash:state.hash,at:new Date().toISOString()};
+    if(id) state.receiptCache[id]=rec;
+    showReceipt(id,rec);
+    verdict($("previewVerdict"),"ok","✅ Approved — receipt below. Re-click returns this cached receipt (CONFLICT: key reused).");
+    toast("✅ Approved: "+emp.employee_id+" + "+state.staged.serial,"ok");
+  }catch(e){
+    verdict($("previewVerdict"),"err","🔴 Approve failed: "+String(e.message).slice(0,200)+" — nothing half-hidden, receipt not issued.");
+    toast(String(e.message).slice(0,200),"err");
+    $("approveBtn").disabled=false;
+  }finally{ state.approving=false; }
+}
+function showReceipt(id,rec){
+  $("receiptPane").hidden=false;
+  $("receiptBody").innerHTML=
+    "<p><strong>ACTIVE "+esc(rec.emp.employee_id||"?")+"</strong> · "+esc(rec.emp.name||"")+" · "+
+    esc(rec.asg.serial||"")+" → "+esc(rec.asg.employee_id||"")+"</p>"+
+    "<p class=\"mono\">hash "+esc(String(rec.hash).slice(0,12))+"… ✓ hash-chained · "+esc(rec.at||"")+"</p>"+
+    "<p class=\"mono\">audit: 2 ALLOW rows · [Verify] recomputes chain</p>";
+  $("approveBtn").disabled=false; $("approveBtn").textContent="✅ APPROVE (cached receipt)";
+}
+async function reject(){
+  var id=state.detail?state.detail.candidate_id:"?";
+  await addAudit("DENY","reject-candidate","✖ Rejected "+id+" by reviewer — no server POST.");
+  verdict($("previewVerdict"),"warn","✖ Rejected "+id+" — DENY row logged, no POST sent.");
+}
+
+/* ============ I6 breach board + I4/H4 forensics ============ */
+async function loadBreaches(){
+  var box=$("breachList");
+  box.innerHTML="<p class=\"skel\">⏳ loading …</p>";
+  try{
+    /* literal string per route-order NOTE — never interpolated from get-ticket path */
+    var list=await api(IT(),"/it/tickets/breaches");
+    markSeen("it_sla_breach_list");
+    state.breaches=Array.isArray(list)?list:[];
+    renderBreaches();
+    if(state.breaches.length)
+      verdict($("breachVerdict"),"err","🔴 "+state.breaches.length+" breached — oldest first. Open Forensics, then reroute via on-call.");
+    else verdict($("breachVerdict"),"ok","🎉 No breaches.");
+  }catch(e){
+    box.innerHTML="";
+    if(String(e.message).indexOf("404")>=0)
+      verdict($("breachVerdict"),"err","🔴 404 on /it/tickets/breaches — route shadowed: server must declare /breaches BEFORE /{id} (15-endpoints.md §3).");
+    else verdict($("breachVerdict"),"err","🔴 IT :8002 unreachable — is uvicorn up? [Retry]");
+    var b=document.createElement("button"); b.className="btn small"; b.textContent="↻ Retry";
+    b.onclick=loadBreaches; $("breachVerdict").appendChild(b);
+    toast(String(e.message).slice(0,200),"err");
+  }
+}
+function breachHours(t){
+  try{ var dl=new Date(t.deadline_at).getTime();
+    return Math.max(0,Math.round((Date.now()-dl)/3600000)); }catch(e){ return "?"; }
+}
+function renderBreaches(){
+  $("breachCount").textContent="("+state.breaches.length+")";
+  var box=$("breachList"); box.innerHTML="";
+  if(!state.breaches.length){ box.innerHTML="<p class=\"skel\">🎉 No breaches.</p>"; return; }
+  state.breaches.forEach(function(t){
+    var d=document.createElement("div"); d.className="card";
+    d.innerHTML="<strong>"+esc(t.ticket_id)+"</strong> · "+esc(t.status||"")+"<br>"+
+      esc(t.title||"")+"<br><span class=\"mono\">breached "+esc(String(breachHours(t)))+"h · "+
+      esc(t.assignee_email||"")+" · team "+esc(t.team||"")+"</span><br>";
+    var btn=document.createElement("button"); btn.className="btn small"; btn.textContent="Forensics";
+    btn.setAttribute("aria-label","Forensics for "+t.ticket_id);
+    btn.onclick=function(ev){ ev.stopPropagation(); forensics(t.ticket_id); };
+    d.appendChild(btn); box.appendChild(d);
+  });
+}
+async function forensics(ticketId){
+  $("forensics").innerHTML="<p class=\"skel\">⏳ forensics "+esc(ticketId)+" …</p>";
+  try{
+    var t=await api(IT(),"/it/tickets/"+encodeURIComponent(ticketId));
+    markSeen("it_get_ticket");
+    var day=""; try{ day=new Date(t.created_at).toISOString().slice(0,10); }catch(e){}
+    var shifts=[];
+    try{ shifts=await api(HR(),"/hr/shifts?"+qs({team:t.team,date:day})); markSeen("hr_shift_calendar"); }
+    catch(e2){ $("forensics").innerHTML='<div class="verdict warn">⚠️ '+esc(t.ticket_id)+
+      " loaded, but shift join failed: "+esc(String(e2.message).slice(0,160))+"</div>"; return; }
+    var onShift=(shifts||[]).some(function(s){ return (s.employee_id||"")===(t.assignee_email||"")||s.on_call; });
+    var shiftTxt=(shifts&&shifts.length)?("shift rows: "+shifts.length):"no shift rows for "+t.team+" @ "+day;
+    verdict($("breachVerdict"),"err","🔴 "+t.ticket_id+" BREACHED · assignee "+(onShift?"on-shift":"off-shift")+
+      " · on-call: "+(state.oncall?state.oncall.email:"unknown — Check on-call")+".");
+    $("forensics").innerHTML='<div class="verdict '+(onShift?"info":"warn")+'">'+
+      esc(t.ticket_id)+" · assignee "+esc(t.assignee_email||"")+(onShift?" on-shift":" off-shift")+
+      " ("+esc(shiftTxt)+")"+(state.oncall?(" · on-call backup: "+esc(state.oncall.email)):"")+"</div>"+
+      '<pre class="json">'+esc(JSON.stringify({ticket:t,shifts:shifts},null,1)).slice(0,1500)+"</pre>";
+  }catch(e){
+    $("forensics").innerHTML='<div class="verdict err">🔴 Forensics failed: '+esc(String(e.message).slice(0,200))+"</div>";
+    toast(String(e.message).slice(0,200),"err");
+  }
+}
+
+/* ============ H5 discovery + I5 reroute chain ============ */
+async function checkOncall(fromRepoll){
+  $("discBody").innerHTML="<p class=\"skel\">⏳ checking on-call (H5 hr_get_oncall)…</p>";
+  try{
+    var oc=await api(HR(),"/hr/oncall?"+qs({team:"support-night"}));
+    markSeen("hr_get_oncall");
+    state.oncall=oc;
+    $("discBody").innerHTML='<div class="verdict ok">✅ get_oncall LIVE — on-call now: '+
+      esc(oc.name||"")+" ("+esc(oc.email||"")+") · team "+esc(oc.team||"")+"</div>";
+    verdict($("discVerdict"),"ok","✅ Discovery complete — reroute unlocked.");
+    renderRerouteStage();
+    toast("✅ On-call: "+(oc.email||"?"),"ok");
+  }catch(e){
+    state.oncall=null;
+    if(String(e.message).indexOf("404")>=0){
+      /* H5 amber pre-discover state */
+      $("discBody").innerHTML='<div class="verdict warn">❌ get_oncall NOT YET exposed — '+
+        "uncomment H5 + run <span class=\"mono\">synapse build --discover</span>, then Re-poll. Q3 stays parked.</div>";
+      verdict($("discVerdict"),"warn","🟡 Pre-discover: H5 absent (amber). Re-poll after --discover.");
+    }else{
+      $("discBody").innerHTML='<div class="verdict err">🔴 On-call check failed: '+esc(String(e.message).slice(0,200))+"</div>";
+    }
+    $("rerouteZone").innerHTML="";
+    if(!fromRepoll) toast(String(e.message).slice(0,200),"err");
+  }
+}
+function renderRerouteStage(){
+  var z=$("rerouteZone"); z.innerHTML="";
+  if(!state.oncall||!state.breaches.length){
+    z.innerHTML="<p class=\"skel\">Reroute needs on-call + ≥1 breach.</p>"; return; }
+  var wrap=document.createElement("div");
+  wrap.innerHTML="<p style=\"font-size:.78rem\">Will reroute <strong>"+state.breaches.length+
+    "</strong> ticket(s) → <strong>"+esc(state.oncall.email)+"</strong> · reason "+
+    "<span class=\"mono\">sla-breach-reroute-to-oncall</span></p>"+
+    "<pre class=\"json\" id=\"reroutePreview\"></pre>";
+  var stage=document.createElement("button"); stage.className="btn small"; stage.textContent="Stage reroute plan";
+  var go=document.createElement("button"); go.className="btn primary small"; go.textContent="APPROVE reroute ×N"; go.disabled=true;
+  stage.onclick=async function(){
+    var plan=state.breaches.map(function(t){ return {ticket_id:t.ticket_id,to_email:state.oncall.email,
+      reason:"sla-breach-reroute-to-oncall"}; });
+    var h=await sha256hex(JSON.stringify(plan));
+    wrap.querySelector("#reroutePreview").textContent="hash "+h.slice(0,12)+"…\n"+JSON.stringify(plan,null,1);
+    go.disabled=false; go.textContent="APPROVE reroute ×"+plan.length+" ("+h.slice(0,6)+")";
+    go.dataset.hash=h; toast("Reroute plan staged — hash "+h.slice(0,6),"ok");
+  };
+  go.onclick=async function(){
+    go.disabled=true; stage.disabled=true;
+    var ok=0;
+    for(var i=0;i<state.breaches.length;i++){ var t=state.breaches[i];
+      try{
+        var r=await api(IT(),"/it/tickets/"+encodeURIComponent(t.ticket_id)+"/reroute",
+          {method:"POST",headers:{"Idempotency-Key":uuid()},
+           body:JSON.stringify({to_email:state.oncall.email,reason:"sla-breach-reroute-to-oncall"})});
+        markSeen("it_reroute_ticket"); ok++;
+        await addAudit("ALLOW","reroute_ticket",t.ticket_id+" → "+state.oncall.email+" · hash "+String(go.dataset.hash||"").slice(0,6));
+      }catch(e){ await addAudit("DENY","reroute-failed",t.ticket_id+": "+String(e.message).slice(0,160));
+        toast(t.ticket_id+": "+String(e.message).slice(0,160),"err"); }
+    }
+    verdict($("discVerdict"),ok?"ok":"err",(ok?"✅ Rerouted "+ok+"/"+state.breaches.length+" to on-call.":"🔴 Reroute failed — see toasts."));
+    await loadBreaches(); stage.disabled=false;
+  };
+  wrap.appendChild(stage); wrap.appendChild(document.createTextNode(" ")); wrap.appendChild(go);
+  z.appendChild(wrap);
+}
+
+/* ============ D1/D2 seed+reset (two-click arm, confirm header, HR→IT fallback) ============ */
+function armButton(btn,label,confirmLabel,fn){
+  if(btn.dataset.armed==="1"){ btn.dataset.armed=""; btn.textContent=label; fn(); }
+  else{ btn.dataset.armed="1"; btn.textContent=confirmLabel;
+    setTimeout(function(){ if(btn.dataset.armed==="1"){ btn.dataset.armed=""; btn.textContent=label; } },6000); }
+}
+async function demoPost(kind){
+  var path="/demo/"+kind;
+  var errs=[];
+  var bases=[HR(),IT()];
+  for(var i=0;i<bases.length;i++){
+    try{
+      var r=await api(bases[i],path,{method:"POST",
+        headers:{"x-demo-confirm":"yes","Idempotency-Key":uuid()},body:"{}"});
+      markSeen(kind==="seed"?"demo_seed":"demo_reset");
+      if(kind==="seed") toast("🌱 seeded via "+bases[i]+" — "+JSON.stringify(r).slice(0,160),"ok");
+      else toast("♻️ reset via "+bases[i]+" — "+JSON.stringify(r).slice(0,160),"ok");
+      await addAudit("SYS",kind.toUpperCase(),"local marker (non-server): "+kind+" via "+bases[i]);
+      await refreshAll();
+      return;
+    }catch(e){ errs.push(bases[i]+": "+e.message); }
+  }
+  toast("🔴 "+kind+" blocked/failed on both bases: "+errs.join(" | ").slice(0,240)+
+    " — check ALLOW_DEMO_SEED=true / 6-per-min guard.","err");
+  await addAudit("SYS",kind.toUpperCase()+"-FAILED",errs.join(" | ").slice(0,200));
+}
+async function statusCheck(){
+  try{
+    var s=null;
+    try{ s=await api(HR(),"/demo/status"); }
+    catch(e){ s=await api(IT(),"/demo/status"); }
+    markSeen("demo_status");
+    if(s&&s.seeded_at) $("footSeed").textContent="seeded_at: "+s.seeded_at;
+    toast("📡 status: "+JSON.stringify(s).slice(0,200),"ok");
+  }catch(e){ toast("📡 status unavailable (404?) — using H1+I6 probe instead: "+String(e.message).slice(0,160),"err"); }
+  await health();
+}
+async function refreshAll(){ await health(); await loadQueue(); await loadBreaches(); }
+
+/* ============ wiring ============ */
+$("queueReload").onclick=loadQueue;
+$("breachReload").onclick=loadBreaches;
+$("teamFilter").onchange=loadQueue;
+$("approveBtn").onclick=approve;
+$("rejectBtn").onclick=reject;
+$("verifyBtn").onclick=verifyChain;
+$("oncallBtn").onclick=function(){ checkOncall(false); };
+$("repolBtn").onclick=function(){ checkOncall(true); };
+$("statusBtn").onclick=statusCheck;
+$("toolRefresh").onclick=refreshAll;
+$("seedBtn").onclick=function(){ armButton($("seedBtn"),"🌱 Seed","⚠️ Click again to confirm seed",function(){ demoPost("seed"); }); };
+$("resetBtn").onclick=function(){ armButton($("resetBtn"),"♻️ Reset","⚠️ Click again — wipes demo tickets",function(){ demoPost("reset"); }); };
+$("copyHashBtn").onclick=function(){
+  if(!state.hash) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(state.hash);
+  toast("hash copied: "+state.hash.slice(0,12)+"…","ok");
+};
+$("dlBtn").onclick=function(){
+  var blob=new Blob([audit.map(function(a){return JSON.stringify(a);}).join("\n")],{type:"application/jsonl"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="audit.jsonl"; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },5000);
+};
+Array.prototype.forEach.call(document.querySelectorAll("[data-font]"),function(b){
+  b.onclick=function(){ document.documentElement.style.fontSize=b.dataset.font+"pt"; };
+});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){ Array.prototype.forEach.call(
+    document.querySelectorAll("[data-armed]"),function(b){ b.dataset.armed=""; });
+    $("seedBtn").textContent="🌱 Seed"; $("resetBtn").textContent="♻️ Reset"; }
+});
+renderTools();
+refreshAll();
+</script>
+</body>
+</html>

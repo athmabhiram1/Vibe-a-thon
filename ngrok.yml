@@ -1,0 +1,20 @@
+version: "2"
+# ngrok.yml — stable share mirror for judging. Primary is ALWAYS localhost (zero cold start);
+# ngrok is the shareable mirror of the same laptop (survives nothing if Wi-Fi dies — localhost continues).
+# Claim 1 free dev domain once: https://dashboard.ngrok.com/domains -> set NGROK_DOMAIN, then:
+#   ngrok start --config ngrok.yml hr it     (both APIs)
+# Tunnels frozen to golden ports: hr 8001, it 8002.
+authtoken: $NGROK_AUTHTOKEN
+tunnels:
+  hr:
+    proto: http
+    addr: 8001
+    domain: $NGROK_DOMAIN_HR
+    inspect: true
+  it:
+    proto: http
+    addr: 8002
+    domain: $NGROK_DOMAIN_IT
+    inspect: true
+# Single-domain fallback (free plan = 1 dev domain): point NGROK_DOMAIN at hr (8001) and use
+# scripts/share.sh which multiplexes, or run: ngrok http 8001 --domain=$NGROK_DOMAIN

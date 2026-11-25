@@ -1,0 +1,82 @@
+[
+  {
+    "id": "L01",
+    "mode": "LIVE",
+    "category": "live_integration",
+    "title": "Approve happy-path -> real EMP id from HR service",
+    "flow": "stage_then_activate",
+    "input": {
+      "candidate_id": "CAND-002",
+      "email": "priya.nair02@example.com",
+      "dept": "Engineering",
+      "start_date": "2026-11-30",
+      "laptop_id": "LT-1011",
+      "bg_status": "pass",
+      "idempotency_key": "live-L01-key"
+    },
+    "expected": "applied + receipt ACTIVE EMP-021 (next EMP-NNN from live HR)"
+  },
+  {
+    "id": "L02",
+    "mode": "LIVE",
+    "category": "live_integration",
+    "title": "Duplicate activate same key+hash -> cached already_applied",
+    "flow": "replay_L01_key_hash",
+    "input": {
+      "candidate_id": "CAND-002",
+      "email": "priya.nair02@example.com",
+      "dept": "Engineering",
+      "start_date": "2026-11-30",
+      "laptop_id": "LT-1011",
+      "bg_status": "pass",
+      "idempotency_key": "live-L01-key"
+    },
+    "expected": "already_applied, same EMP id, employee count unchanged (no 2nd write)"
+  },
+  {
+    "id": "L03",
+    "mode": "LIVE",
+    "category": "live_integration",
+    "title": "BG-fail -> deny before any write",
+    "flow": "stage_only",
+    "input": {
+      "candidate_id": "CAND-003",
+      "email": "chen.wei03@example.com",
+      "dept": "Engineering",
+      "start_date": "2026-11-30",
+      "laptop_id": "",
+      "bg_status": "fail",
+      "idempotency_key": "live-L03-key"
+    },
+    "expected": "denied bg_fail_blocked, no ledger entry, no HR write"
+  },
+  {
+    "id": "L04",
+    "mode": "LIVE",
+    "category": "live_integration",
+    "title": "LT-1005 hold conflict -> deny at commit (precondition_failed)",
+    "flow": "stage_then_activate",
+    "input": {
+      "candidate_id": "CAND-004",
+      "email": "sara.thomas04@example.com",
+      "dept": "Design",
+      "start_date": "2026-11-30",
+      "laptop_id": "LT-1005",
+      "bg_status": "pass",
+      "idempotency_key": "live-L04-key"
+    },
+    "expected": "stage previews with hold warning; activate denied precondition_failed:laptop_hold_conflict:LT-1005, no HR write"
+  },
+  {
+    "id": "L05",
+    "mode": "LIVE",
+    "category": "live_integration",
+    "title": "Reroute breached ticket -> live on-call owner",
+    "flow": "resolve_oncall_then_reroute",
+    "input": {
+      "ticket_id": "T-5002",
+      "team": "support-night"
+    },
+    "expected": "GET /it/oncall-coverage resolves oncall live; POST /it/tickets/T-5002/reroute sets assignee to on-call employee"
+  }
+]

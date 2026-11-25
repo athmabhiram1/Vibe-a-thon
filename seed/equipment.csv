@@ -1,0 +1,21 @@
+asset_tag,serial,category,model,status,assigned_to,hold_for_candidate,location,po_number,warranty_expiry
+LT-1001,SN-MBP14-A1001,laptop,MacBook Pro 14,on_hold,,CAND-011,BLR-Desk-014,PO-2026-0142,2027-11-01
+LT-1002,SN-TPT14-B1002,laptop,ThinkPad T14,on_hold,,CAND-012,HYD-Store,PO-2026-0143,2027-10-15
+LT-1003,SN-MBP14-C1003,laptop,MacBook Pro 14,on_hold,,CAND-005,BLR-Desk-022,PO-2026-0144,2027-11-01
+LT-1004,SN-TPT14-D1004,laptop,ThinkPad T14,assigned,EMP-008,,BLR-Desk-031,PO-2026-0145,2027-09-01
+LT-1005,SN-MBP14-E1005,laptop,MacBook Pro 14,on_hold,,CAND-002,BLR-Desk-040,PO-2026-0146,2027-11-01
+LT-1006,SN-TPT14-F1006,laptop,ThinkPad T14,assigned,EMP-009,,BLR-Desk-033,PO-2026-0147,2027-09-01
+LT-1007,SN-MBP14-G1007,laptop,MacBook Pro 14,assigned,EMP-010,,BLR-Desk-035,PO-2026-0148,2027-11-01
+LT-1008,SN-MBP14-X7K2-991A,laptop,ThinkPad T14,assigned,EMP-014,,BLR-Desk-101,PO-2026-0149,2027-08-01
+LT-1009,SN-MBP14-X7K2-991B,laptop,ThinkPad T14,assigned,EMP-015,,BLR-Desk-102,PO-2026-0150,2027-08-01
+LT-1010,SN-MBP14-J1010,laptop,MacBook Pro 14,assigned,EMP-017,,BLR-Desk-037,PO-2026-0151,2027-11-01
+LT-1011,SN-DL5420-K1011,laptop,Dell Latitude 5420,available,,,HYD-Store,PO-2026-0152,2027-05-01
+LT-1012,SN-TPT13-L1012,laptop,ThinkPad T13,retired,,,HYD-Store,PO-2024-0098,2025-06-30
+MN-2001,SN-DELL-M2001,monitor,Dell U2723QE,assigned,EMP-011,,BLR-Desk-041,PO-2026-0160,2028-01-15
+MN-2002,SN-DELL-M2002,monitor,Dell U2723QE,available,,,HYD-Store,PO-2026-0161,2028-01-15
+MN-2003,SN-DELL-M2003,monitor,Dell U2723QE,available,,,HYD-Store,PO-2026-0162,2028-01-15
+MN-2004,SN-DELL-M2004,monitor,Dell U2723QE,available,,,HYD-Store,PO-2026-0163,2028-01-15
+BDG-3001,SN-BDG-3001,badge,HID ProxCard,assigned,EMP-018,,BLR-FrontDesk,PO-2026-0170,2029-01-01
+BDG-3002,SN-BDG-3002,badge,HID ProxCard,available,,,HYD-Store,PO-2026-0171,2029-01-01
+BDG-3003,SN-BDG-3003,badge,HID ProxCard,available,,,HYD-Store,PO-2026-0172,2029-01-01
+BDG-3004,SN-BDG-3004,badge,HID ProxCard,available,,,HYD-Store,PO-2026-0173,2029-01-01

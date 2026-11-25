@@ -1,0 +1,9 @@
+shift_id,name,start_time,end_time,timezone,member_ids
+SH-01,BLR-Morning,09:00,17:00,Asia/Kolkata,EMP-014;EMP-015
+SH-02,BLR-Evening,14:00,22:00,Asia/Kolkata,EMP-014;EMP-016
+SH-03,Night-OnCall,22:00,06:00,Asia/Kolkata,EMP-016
+SH-04,HYD-Day,09:00,17:00,Asia/Kolkata,EMP-015
+SH-05,BLR-Wknd-AM,09:00,13:00,Asia/Kolkata,EMP-015
+SH-06,BLR-Wknd-PM,13:00,17:00,Asia/Kolkata,EMP-016
+SH-07,Sun-OnCall,09:00,17:00,Asia/Kolkata,EMP-014
+SH-08,support-night,22:00,06:00,Asia/Kolkata,EMP-014

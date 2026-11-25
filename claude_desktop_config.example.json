@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "hr-api": {
+      "command": "C:\\Python313\\python.exe",
+      "args": ["C:\\ABS\\PATH\\TO\\VIBE_CODE\\synapse_auto_server.py"],
+      "env": {
+        "MCP_REV": "1",
+        "HR_BASE_URL": "http://localhost:8001",
+        "IT_BASE_URL": "http://localhost:8002",
+        "PYTHONUTF8": "1"
+      }
+    },
+    "safety-custom": {
+      "command": "C:\\Python313\\python.exe",
+      "args": ["C:\\ABS\\PATH\\TO\\VIBE_CODE\\safety_check_server.py"],
+      "env": {
+        "MCP_REV": "1",
+        "PYTHONUTF8": "1"
+      }
+    }
+  }
+}
