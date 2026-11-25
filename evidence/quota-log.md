@@ -22,6 +22,7 @@ PROOF: submission/assets/quota-proof/TODO.png
 | 2026-11-24 09:39 | `live discover R1 (L1)` | 2/10 · 775/100.0K · 99.2K left | move `live_moment.py` out → `synapse build --auto --endpoints "<13-tool allowlist>" --server-name hr-api` (13, 2.36s) → restore → `synapse build --discover --auto --endpoints "<14-tool allowlist: +GET /oncall-coverage>" --server-name hr-api` | 2/10 · 775/100.0K · 99.2K left | 13→14 | CLI transcript in `research/verify-final/12-synapse-run.md` |
 | 2026-11-24 09:40 | `live discover R2 (L1)` | 2/10 · 775/100.0K · 99.2K left | same choreography as R1: baseline 13 (4.75s) → discover 14 (4.72s), same server ID | 2/10 · 775/100.0K · 99.2K left | 13→14 | CLI transcript in `research/verify-final/12-synapse-run.md` |
 | 2026-11-24 09:41 | `live discover R3 (L1)` | 2/10 · 775/100.0K · 99.2K left | same choreography as R1: baseline 13 (4.83s) → discover 14 (4.82s), same server ID | 2/10 · 775/100.0K · 99.2K left | 13→14 | CLI transcript in `research/verify-final/12-synapse-run.md` |
+| 2026-11-25 14:48 | `28-discover rehearsal check (NO BUILD — hr-api already 14, H5 live)` | 2/10 · 775/100.0K · 99.2K left | no `synapse build` executed (guard "ONLY if baseline is 13" false); read-only `synapse info` + Inspector `tools/list` only | 2/10 · 775/100.0K · 99.2K left | 14 (unchanged) | `research/verify-final/28-discover.md` |
 
 ## Quota rules (free tier)
 

@@ -10,6 +10,8 @@ __pycache__/
 .pytest_cache/
 # Local env with secrets
 .env
+.env.*
+!.env.example
 # Demo video — allow only the golden cut
 *.mp4
 !demo/golden.mp4
@@ -20,4 +22,9 @@ node_modules/
 .next/
 *.log
 .synapse/discover/
+# secrets-audit 2026-11-25: session transcripts + key material (discover/ already covered)
+*.jsonl
+*session*.json
+*.pem
+*.key
 

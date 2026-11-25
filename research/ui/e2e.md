@@ -5,7 +5,9 @@ Date: 2026-11-25 (UTC) · Runner: e2e lane · Base: `workspace-25f2ad75-4340-469
 ## Environment (as found)
 
 - **Next dev on :3000 was DOWN on arrival** (curl `000`, nothing listening on 3000/8001/8002).
-  Started with `bun run dev` in background (1st try, up within ~1 min). No reboot of backends was performed.
+  It is UP now (my `bun run dev` background attempt failed — the `dev` script pipes
+  through `tee`, which doesn't exist on Windows — so the running server was started
+  by a parallel lane/process, verified with live 200s during this sweep). No reboot of backends was performed.
 - **Backends :8001 (HR) + :8002 (IT) are DOWN, not RUNNING.** Direct probes
   `GET 127.0.0.1:8001/hr/demo/status` and `GET 127.0.0.1:8002/it/demo/status`
   both return empty / connection-refused. `netstat` shows no listeners on 8001/8002.
@@ -46,6 +48,6 @@ Date: 2026-11-25 (UTC) · Runner: e2e lane · Base: `workspace-25f2ad75-4340-469
 
 ## Summary
 
-- **Next-blocked? NO** — dev server started 1st try, all 8 routes reachable. No fallback to backend-direct testing needed.
+- **Next-blocked? NO** — dev server reachable for the whole sweep (started by a parallel lane; my own `bun run dev` failed on missing Windows `tee`), all 8 routes tested live. No fallback to backend-direct testing needed.
 - **Pass: 3/8** (breaches, audit, inject-skip-checks). **Backend-blocked: 4/8** (candidates ×2, demo status, approve create_employee) — all return honest 502s. **Partial: 1/8** (demo oncall: `available:false` ✓, status 502 vs expected 200).
 - To reach green: start HR (:8001) + IT (:8002) backends, then re-run rows 1, 2, 4, 5, 6. Expected deltas: candidates list + CAND-002 single fetch, demo `ok:true`, oncall 200-or-live-data, approve returning EMP-02x (record that row in this file on retry).

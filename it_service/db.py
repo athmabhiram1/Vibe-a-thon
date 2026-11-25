@@ -193,7 +193,7 @@ async def create_ticket(
         await db.execute(
             "INSERT INTO tickets (ticket_id,title,requester_id,assignee_id,"
             " priority,category,status,created_at,due_at,shift_id,channel)"
-            " VALUES (?,?,?,?,?,'open',?,?,?,?,'portal')",
+            " VALUES (?,?,?,?,?,'other','open',?,?,?,'portal')",
             (
                 ticket_id,
                 title,

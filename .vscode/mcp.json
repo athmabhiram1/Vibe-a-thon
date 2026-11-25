@@ -1,0 +1,22 @@
+{
+  "servers": {
+    "hr-api": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["${workspaceFolder}/synapse_auto_server.py"],
+      "env": {
+        "MCP_REV": "1",
+        "HR_BASE_URL": "http://localhost:8001",
+        "IT_BASE_URL": "http://localhost:8002"
+      }
+    },
+    "safety-custom": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["${workspaceFolder}/safety_check_server.py"],
+      "env": {
+        "MCP_REV": "1"
+      }
+    }
+  }
+}

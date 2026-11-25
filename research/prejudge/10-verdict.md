@@ -1,0 +1,31 @@
+# 10 — Pre-submit verdict (hostile synthesizer, 2026-11-25)
+
+**Evidence status:** `research/prejudge/01-09` ABSENT — all nine lanes UNVERIFIED. No evidence invented.
+Fallback used (only): `reconcile/RECONCILE.md` (2026-11-22, boot/validate/eval green) + `plan.md` (driver, claims 23/25 FUND / 97.5% acc) + read-only spot-checks of `submission/`, `eval/scorecard.csv`, `hr_service/`, `it_service/`, `research/verify-final/22-packet-audit.md`, `33-blockers.md`, `34-verdict.md`. Anything this file cannot cite to one of those is marked MISSING.
+
+## Verdict: FIX-FIRST (not submittable as-is; not DO-NOT-SUBMIT — core is green, packet is not)
+
+Core backend survives: RECONCILE D3 boot (hr:8001 + it:8002 `{"ok":true}` ×2), `seed/validate.py 0 failure(s)`, `eval/run.py` guarded block 96.8% / FP 0.0% (40 cases), `pytest tests/test_guards_smoke.py 11 passed`, H5 `hr_get_oncall` + L1 `it_oncall_coverage` live on disk (spot-checked: `hr_service/routers/hr.py:188-189`, `it_service/routers/live_moment.py:60-61`, `it_service/main.py:27`). That is the only reason this is not DO-NOT-SUBMIT. Everything a judge actually clicks to score you — video, repo URL, rendered arch, LIMITS numbers — is placeholder or missing.
+
+## FIX-FIRST list (file:line + minutes + owner)
+
+1. `submission/README.md:TODO` — 2× `[UPLOAD PENDING]` (video URL, repo URL) + 1× `<PASTE-REPO-URL-HERE>`. Origin points at unrelated `pcb_designing.git` (per 22-packet-audit §Gaps). **60–90 min, owner: user-only** (record + `gh repo create`, push, paste URLs + QR). No agent can do this for you.
+2. `demo/golden.mp4` — DOES NOT EXIST (`demo/` contains only `SHOTLIST.md`; recursive `*.mp4` = zero hits per 33-R4). P0 fallback ladder is unperformable; any live stall drops straight to P4 narrative. **90 min, owner: user-only** (OBS 1080p30, ≤90 s, USB×2 + unlisted YouTube). Highest-EV item — see below.
+3. `submission/ARCHITECTURE.md:24` references `submission/assets/arch.png` — FILE MISSING ON DISK (22 confirms). Deck slide 5 points at the same hole. **20 min, owner: you/agent** (render mermaid `flowchart LR` via mermaid-cli → 2x PNG, commit).
+4. `submission/LIMITS.md:7` — `[AWAITING quota-lane synapse info]` STALE. Numbers already measured (`evidence/quota-log.md`, `submission/assets/quota-proof/synapse-info.txt`: 2/10 servers, 775/100.0K lines). **5 min, owner: you/agent** (paste numbers + link proof).
+5. `submission/assets/quota-proof/` — txt only, zero PNGs (`synapse-info.png`, `ollama-ps.png`, `ngrok.png`, `ai-dashboard.png` absent per 22). "₹0 / quota survived" claim is unprovable on screen. **20 min (ollama-ps now) + freeze-day rest, owner: mixed** (agent: `ollama ps` screenshot; user: freeze-day captures).
+6. Breach-count drift — script says "3 breached" (`plan.md:100`, RECONCILE line 6/56) but predicate is live wall-clock (`due_at < now`); 33-R2 measured **14 breached** by showtime. Judge recounts → fiction flag. **15 min, owner: you/agent** (re-seed T-30 min ritual + rewrite PITCH line to "breaching tickets (live count)" or pin `now`; canonical IDs only: CAND-002 / LT-1005 / T-5001).
+7. Tool-count story contradiction — `plan.md:90/94` says disk 20 ops (HR 9 + IT 11, incl. `/demo/*`) with 13→14 Synapse surface (11/12 functional); RECONCILE lines 56-59 says HR=5 + IT=7. Both true under different counting rules (health/demo excluded or not) but no single cue-card states the rule. Judge asks "how many tools?" → stammer. **10 min, owner: you/agent** (one canonical count card in README + cue card; paste exact `--endpoints` allowlist strings, prefix-stripped per 33-R3).
+8. `eval/` headline mismatch — `plan.md:8` claims 97.5% acc (39/40) / 96.8% block (30/31); RECONCILE line 69 claims guarded 96.8% / FP 0.0% (40 cases, 31 mal/9 ben); `eval/scorecard.csv:1-30` spot-check shows all-guarded-correct rows so far but M05 WARN (block-intent by design per 34) is never defended on camera. **10 min, owner: you/agent** (pick ONE headline number, speak the MOCK+caveat aloud: "regex-over-JSON MOCK + 11 ms simulated, 5 live measured pass"; never say bare `96.8%`).
+
+Total agent-fixable: ~60 min. Total user-only: ~3 h (video + repo + freeze captures). Nothing here needs a code rewrite.
+
+## Top-3 AI-judge objections (with rebuttal status)
+
+1. **"No working demo — video TODO, repo URL points at the wrong project."** Rebuttal in repo: NONE. 22 confirms both placeholders live in `submission/README.md`; `demo/golden.mp4` absent. This objection KILLS. Only fix is F1+F2 above. Do not submit with `[UPLOAD PENDING]` in the packet.
+2. **"Safety numbers are mock theater — 96.8%/0% FP is a regex over JSON, not a live guard."** Rebuttal in repo: PARTIAL. `eval/run.py` + `eval/scorecard.csv` (40 cases, latencies ~11 ms mock) + `eval/live_cases.json` + `eval/live_scorecard.csv` (5 live) + `probe_live.py ALL PASSED` exist, and 34 scripts the honest spoken line. But `plan.md:129` buries "MOCK + 5 LIVE" in one clause and the headline number differs between files (97.5% vs 96.8%). A hostile judge quotes the bigger number back at you. Fix is F8: one number, caveat spoken, live-5 cited.
+3. **"The 'live discover' moment is staged — L1 404s on stale servers and the breach count is fiction."** Rebuttal in repo: PARTIAL. L1 exists on disk (`it_service/routers/live_moment.py:60-61`, included at `it_service/main.py:27`) and 12/34 document 13→14 discover ×3 same-ID at ~4.8 s medians — real. BUT 33-R1 proves stale-server L1 404 on camera is the #1 on-camera risk, and 33-R2 proves "3 breached" drifts to 14 by showtime. Rebuttal only holds with the 5-command pre-record ritual (`seed/validate.py --db seed/demo.db`, both `/health`, L1 `?team=support-night` → EMP-014 + breach_count, `probe_live.py`) and the F6 script fix. Without the ritual, the objection lands.
+
+## Single highest-EV fix in remaining time
+
+**Record `demo/golden.mp4` tonight (F2, ~90 min, user-only).** Reasoning: every other risk (stale L1, quota 429, Wi-Fi death, breach drift, spinner silence) is survivable WITH a P0 bottom rung and fatal WITHOUT one — 33-R4 is the only CERTAIN-if-live-fails × FATAL item, and it is also the shield for R1/R2/R3/R5. Agent edits (arch.png, LIMITS numbers, count card) are 60 min and worth doing, but none of them saves a dead live demo. P0 first; everything else second. Until P0 exists, verdict stays FIX-FIRST — do not press submit.

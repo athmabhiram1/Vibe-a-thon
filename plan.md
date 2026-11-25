@@ -107,8 +107,8 @@ Live runbook: baseline build (H1-H5 + I1-I6 + 2×/health = 13 tools; 11 function
 
 ```bash
 synapse init                                        # hosted key (skip for --local)
-synapse build --auto --all-endpoints --server-name hr-api
-synapse build --auto --all-endpoints --server-name it-api --new
+synapse build --auto --endpoints "GET /candidates,GET /candidates/{candidate_id},POST /employees,GET /shifts,GET /oncall" --server-name hr-api
+synapse build --auto --endpoints "GET /equipment,POST /equipment/assign,POST /tickets,GET /tickets/breaches,GET /tickets/{ticket_id},POST /tickets/{ticket_id}/reroute" --server-name it-api --new
 synapse info                                        # log quota every hosted build
 # LIVE:
 synapse build --discover --auto --all-endpoints --server-name hr-api

@@ -1,0 +1,30 @@
+# `synapse info` — quota proof (live text capture)
+# Captured: 2026-11-25 17:35 UTC (`synapse --version` 0.1.9)
+# Source of truth for free-tier quota. Numbers copied verbatim from live `synapse info` output below.
+# No builds were run for this capture (read-only). API key redacted (live output shows `(not set) (project)`).
+
+```text
+
+  Synapse Info
+  ────────────────────────
+
+  Project
+
+  Status          Initialized
+  Version         1.0.0
+  Created         2026-11-24 13:57
+  API key         (not set) (project)
+  Analyzed        Not yet (run synapse analyze)
+
+  Account Quota
+
+  MCP servers     2 / 10 used  (8 remaining)
+  Lines indexed   775 / 100.0K  (99.2K remaining)
+
+```
+
+# Interpretation (copied, not invented — matches live output above)
+# - MCP servers: 2 / 10 used (8 remaining)
+# - Lines indexed: 775 / 100.0K (99.2K remaining)
+# - Matches evidence/quota-log.md last AFTER row (2/10 · 775/100.0K · 99.2K left) and submission/LIMITS.md.
+# - Spend: INR 0 / $0 (free tier; rebuilds reuse surface_cache.json, no re-index cost).

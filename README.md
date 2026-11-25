@@ -13,30 +13,29 @@ DBs are SQLite files (`hr_service/hr.db`, `it_service/it.db`) — auto-created, 
 > quickstart below is **5 cmds**: boot + open UI + seed-gate.
 
 ```bat
-git clone <PASTE-REPO-URL-HERE> ^&^& cd VIBE_CODE
+git clone https://github.com/athmabhiram1/Vibe-a-thon.git ^&^& cd Vibe-a-thon
 pip install -r requirements.txt
 run.bat
-start frontend.html
+start http://localhost:3000/console
 python seed/validate.py
 ```
 
 What each cmd does (all verified 2026-11-24 — see Verification below):
 
-1. `git clone … && cd VIBE_CODE` — fetch the repo. ⚠️ Not yet published: `origin` currently points at an
-   unrelated `pcb_designing.git` — do NOT push there. See `submission/README.md` publish checklist
-   (`[UPLOAD PENDING]` items are intentional, not stale TODOs).
+1. `git clone https://github.com/athmabhiram1/Vibe-a-thon.git && cd Vibe-a-thon` — fetch the repo (public).
 2. `pip install -r requirements.txt` — installs the pinned root requirements (fastapi, fastmcp, uvicorn,
-   aiosqlite, …). This file now exists at repo root; both quickstarts point at it.
+   aiosqlite, …).
 3. `run.bat` — boots both APIs in separate windows: HR `http://localhost:8001` (`/docs`, `/openapi.json`)
    + IT `http://localhost:8002`, waits 5s, then probes `GET /hr/candidates?limit=1` and
    `GET /it/tickets/breaches`. Requires `uvicorn` on PATH (cmd 2 provides it).
-4. `start frontend.html` — opens the single-file demo UI (vanilla JS, no build step; HR base
-   `http://localhost:8001`, IT base `http://localhost:8002`). Double-clicking the file works too.
+4. Open `http://localhost:3000/console` — the Next.js demo UI (HR base
+   `http://localhost:8001`, IT base `http://localhost:8002`).
 5. `python seed/validate.py` — seed invariant gate (stdlib only, no server needed). Expect `0 failure(s)`
-   (20/20/20/20/20/8/6-row counts, exactly 3 breached, double-hold + rehire + stale-key traps green).
+   (20/20/20/20/8/6/5-row counts, exactly 3 breached, double-hold + rehire + stale-key traps green).
 
-Seed/reset at runtime: `POST /demo/seed` (headers `x-demo-confirm: yes`, `ALLOW_DEMO_SEED=true`)
-→ `POST /demo/reset` → `GET /demo/status`.
+Seed/reset at runtime (prefixed per service): `POST /hr/demo/seed` + `POST /it/demo/seed`
+(headers `x-demo-confirm: yes`, `ALLOW_DEMO_SEED=true`)
+→ `POST /hr/demo/reset` + `POST /it/demo/reset` → `GET /hr/demo/status` + `GET /it/demo/status`.
 
 ## Verification (dry-run, minus clone — 2026-11-24)
 
@@ -44,7 +43,7 @@ Seed/reset at runtime: `POST /demo/seed` (headers `x-demo-confirm: yes`, `ALLOW_
   (installed `uvicorn 0.54.0`, `fastapi 0.165.0` match pins).
 - `run.bat` exists; contents verified (checks `uvicorn`, starts both servers on 8001/8002, probes both
   endpoints). Not executed here (spawns server windows) — contents + dependency check = dry-run pass.
-- `frontend.html` exists (single-file UI, HR :8001 / IT :8002).
+- Next.js demo UI in `workspace-*/src` (console queue, review detail, audit tail; HR :8001 / IT :8002).
 - `python seed/validate.py --csv seed` → `0 failure(s)` (breached=3 `[T-5001, T-5002, T-5019]`, on-call
   `support-night` resolves).
 - `git clone` not executed (no publishable URL yet — `[UPLOAD PENDING]`); command syntax matches the
@@ -59,4 +58,4 @@ Seed/reset at runtime: `POST /demo/seed` (headers `x-demo-confirm: yes`, `ALLOW_
 ## Publish status
 
 - 🎥 Video (60–90s): `[UPLOAD PENDING — record per PITCH.md, save USB copy to demo/golden.mp4, upload unlisted, paste URL here]`
-- 📦 Repo URL: `[UPLOAD PENDING — create repo, push, replace <PASTE-REPO-URL-HERE> in both READMEs]`
+- 📦 Repo URL: `https://github.com/athmabhiram1/Vibe-a-thon` (public)

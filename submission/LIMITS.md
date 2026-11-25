@@ -4,7 +4,7 @@
 
 | Service | Tier | Cap used | We use | Proof |
 |---|---|---|---|---|
-| Synapse hosted | Free: 10 MCP servers, 100k indexed lines/account | 2/10 servers, 775/100K lines (`synapse info` 2026-11-24; see `../evidence/quota-log.md`) | 2 servers (hr-api, it-api) | `../evidence/quota-log.md` + `assets/quota-proof/synapse-info.txt` (text capture 2026-11-24, key redacted) |
+| Synapse hosted | Free: 10 MCP servers, 100k indexed lines/account | 2/10 servers, 775/100K lines (`synapse info` 2026-11-24; see `../evidence/quota-log.md`) | 2 servers (hr-api 6269969f, it-api 5fe96a56) | `../evidence/quota-log.md` + `assets/quota-proof/synapse-info.txt` (text capture 2026-11-24, key redacted) |
 | Hosting (judged runs) | localhost + ngrok free (no paid cloud) | localhost measured (boot 1.3s/svc, BENCHMARKS.md); ngrok tunnels [UNMEASURED — paste `ngrok` session count at freeze] | 2×uvicorn :8001/:8002 | `assets/quota-proof/ngrok.png` (user-owned freeze-day shot; pending) |
 | Cloud backup | Fly 2s-wake / Render Free | 0 hrs used (nothing deployed during build; backup only) | Backup only; Render $7 rejected | `assets/quota-proof/` ([screenshot pending — only if backup is deployed]) |
 | AI (judged) | Hosted frontier default | [UNMEASURED — paste request count + daily quota from provider dashboard at freeze] | Cached; TTFT tripwire T4 | dashboard screenshot (user-owned freeze-day shot; pending) |
